@@ -10,50 +10,180 @@
  * @remark This file does not adhere to the "Power Of 10" standard, as it is explicitly a joke and not meant for production.
  */
 
+// I know the parameter orders are a bit unorthodox, I wanted to make sure SAL was able to access the size parameters.
+
 #include <stdlib.h>
+#include <sal.h>
 #include "solitaire-sort.h"
+
+// Constants
+enum
+{
+    NUM_FIELD_STACKS = 8,
+    NUM_CARDS_IN_HAND = 3,
+    MAX_RETRIES = 3,
+};
 
 typedef struct
 {
-    char *cards;
-    int deckSize;
-} Deck;
+    _Field_size_(numCards) card_t *cards;
+    size_t numCards;
+    // Should not transfer more than this outside of setup
+    size_t visible;
+} CardStack;
+
+void ConstructStack_Empty(
+    _Out_ CardStack *stack)
+{
+    stack->cards = NULL;
+    stack->numCards = 0;
+}
+
+/**
+ * Unassertable assumption: src array must be EXACTLY (count)-many elements.
+ */
+void ConstructStack_FromList(
+    _Out_ CardStack *stack,
+    _In_reads_(count) const card_t src[],
+    const size_t count)
+{
+    stack->cards = malloc(count);
+    stack->numCards = count;
+}
+
+// Might be misunderstanding the SAL notation.
+// In case I get warnings or errors later on: stack will not be null, but its insides will be emptied and nullified.
+void DestructStack(
+    _Inout_ CardStack *stack)
+{
+    if (stack->cards)
+    {
+        free(stack->cards);
+    }
+    // Just to be safe in case some schmuck like myself tries to reuse a destructed stack.
+    stack->cards = NULL;
+    stack->numCards = 0;
+}
+
+/**
+ * Unassertable assumption: src array must be AT LEAST (start + count)-many elements.
+ */
+void PushToStack(
+    _Inout_ CardStack *stack,
+    _In_reads_(start + count) const card_t src[],
+    const size_t start,
+    const size_t count)
+{
+    const card_t *temp = stack->cards;
+
+    const size_t newNumCards = stack->numCards + count;
+    stack->cards = malloc(newNumCards);
+
+    {
+        size_t i = 0;
+        // Copy over pre-existing elements
+        for (; i < stack->numCards; ++i)
+        {
+            stack->cards[i] = temp[i];
+        }
+        // Push new elements
+        for (size_t j = start; (i < newNumCards) && (j < start + count); ++i, ++j)
+        {
+            stack->cards[i] = src[j];
+        }
+    }
+
+    // The fact that temp might have been null will not matter until we try to free it.
+    // The for loop above would only have tried to access temp's elements if numCards != 0,
+    // which would mean it was initialized incorrectly anyway--and that's not this function's problem to deal with.
+    if (temp)
+    {
+        free(temp);
+    }
+
+    stack->numCards = newNumCards;
+}
+
+void PopFromStack(
+    _Inout_ CardStack *stack,
+    const size_t count)
+{
+    stack->numCards -= count;
+}
+
+void TransferCards(
+    const size_t start,
+    const size_t count,
+    _Inout_ CardStack *src,
+    _Inout_ CardStack *dest)
+{
+    PushToStack(dest, src->cards, start, count);
+    PopFromStack(src, count);
+}
+
+typedef CardStack Deck;
 
 typedef struct
 {
     Deck deck;
-    char hand[3];
-    char *field[8];  // Unordered cards in the process of being ordered
-    char *stacks[1]; // Where complete piles go - Would have a set of four stacks in real solitare, but we're only sorting one list.
+    CardStack hand;
+    CardStack field[NUM_FIELD_STACKS]; // Unordered cards in the process of being ordered
+    CardStack ordered[1];              // Where complete pile goes - Would have a set of four stacks in real solitare, but we're only sorting one list.
 } Board;
 
-void Scramble(Deck *deck)
+void Shuffle(
+    _Inout_ Deck *deck)
 {
     // todo
 }
 
-void Deal(Deck *deck, const char *data, const int size)
+/**
+ * Splits deck onto field
+ */
+void Deal(
+    _Inout_ Deck *deck,
+    _Out_ Board *board)
 {
-    deck->deckSize = size;
-    deck->cards = malloc(deck->deckSize);
-    for (int i = 0; i < size; ++i)
+    for (size_t stackToFill = NUM_FIELD_STACKS; stackToFill > 0; --stackToFill)
     {
-        deck->cards[i] = data[i];
+        for (size_t i = 0; i < stackToFill; ++i)
+        {
+            // todo
+        }
     }
-}
-void PackUp(Deck *deck)
-{
-    free(deck->cards);
 }
 
-int SolitaireSort(char *data, const int size)
+_Success_(return == 0) int TrySort(
+    _Out_ CardStack *result,
+    _In_reads_(size) const card_t data[],
+    const size_t size)
 {
     Deck deck;
-    Deal(&deck, data, size);
-    for (int i = 0; i < 3; ++i) // Can retry a maximum of three times before returning with error.
+    ConstructStack_FromList(&deck, size, &data);
+
+    Board board;
+    Deal(&deck, &board);
+
+    // todo
+}
+
+_Success_(return == 0) int SolitaireSort(
+    _Inout_updates_all_(size) card_t *data[],
+    const size_t size)
+{
+    for (size_t i = 0; i < MAX_RETRIES; ++i) // Can retry a maximum of three times before returning with error.
     {
-        Scramble(&deck);
+        CardStack *result; // Will get assigned by TrySort
+        if (TrySort(data, size, result) == 0)
+        {
+            for (size_t i = 0; i < size; ++i)
+            {
+                data[i] = result->cards[i];
+            }
+            free(result);
+            return 0;
+        }
+        free(result);
     }
-    PackUp(&deck);
     return 1;
 }

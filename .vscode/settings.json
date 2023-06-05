@@ -3,6 +3,7 @@
         "*.py": "python",
         "*.graph": "eagraph",
         "*.cg": "eagraph",
-        "solitaire-sort.h": "c"
+        "solitaire-sort.h": "c",
+        "sal.h": "c"
     }
 }
