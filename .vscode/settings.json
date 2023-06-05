@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.py": "python",
+        "*.graph": "eagraph",
+        "*.cg": "eagraph",
+        "solitaire-sort.h": "c"
+    }
+}
