@@ -12,9 +12,6 @@
 
 type Card = string;
 
-class CardStackBase {
-}
-
 /**
  * A stack of cards.
  */
