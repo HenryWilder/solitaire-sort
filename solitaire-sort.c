@@ -12,9 +12,18 @@
 
 // I know the parameter orders are a bit unorthodox, I wanted to make sure SAL was able to access the size parameters.
 
-#include <stdlib.h>
+#include <time.h>
 #include <sal.h>
+#include <stdlib.h>
 #include "solitaire-sort.h"
+
+int RandBetween(
+    int min,
+    int max)
+{
+    int result = rand() * (max - min) + min;
+    return result;
+}
 
 // Constants
 enum
@@ -28,27 +37,24 @@ typedef struct
 {
     _Field_size_(numCards) card_t *cards;
     size_t numCards;
-    // Should not transfer more than this outside of setup
-    size_t visible;
-} CardStack;
+    /** Should not transfer more than this outside of setup. */
+    _Field_range_(0, numCards) size_t visible;
 
-void ConstructStack_Empty(
-    _Out_ CardStack *stack)
-{
-    stack->cards = NULL;
-    stack->numCards = 0;
-}
+} CardStack;
 
 /**
  * Unassertable assumption: src array must be EXACTLY (count)-many elements.
+ * To construct empty, provide empty array and 0 in count.
  */
-void ConstructStack_FromList(
+void ConstructStack(
     _Out_ CardStack *stack,
     _In_reads_(count) const card_t src[],
-    const size_t count)
+    const size_t count,
+    const size_t visible)
 {
     stack->cards = malloc(count);
     stack->numCards = count;
+    stack->visible = visible;
 }
 
 // Might be misunderstanding the SAL notation.
@@ -60,9 +66,11 @@ void DestructStack(
     {
         free(stack->cards);
     }
+
     // Just to be safe in case some schmuck like myself tries to reuse a destructed stack.
     stack->cards = NULL;
     stack->numCards = 0;
+    stack->visible = 0;
 }
 
 /**
@@ -153,18 +161,37 @@ void Deal(
     }
 }
 
+/**
+ * Treat output as boolean
+ */
+char CheckOrdered(
+    _Inout_updates_all_(size) card_t *data[],
+    const size_t size)
+{
+    for (size_t i = 1; i < size; ++i)
+    {
+        if (data[i - 1] > data[i])
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 _Success_(return == 0) int TrySort(
     _Out_ CardStack *result,
     _In_reads_(size) const card_t data[],
     const size_t size)
 {
     Deck deck;
-    ConstructStack_FromList(&deck, size, &data);
+    ConstructStack_FromList(&deck, &data, size);
 
     Board board;
     Deal(&deck, &board);
 
     // todo
+
+    CheckOrdered(result->cards, result->numCards);
 }
 
 _Success_(return == 0) int SolitaireSort(
@@ -174,7 +201,7 @@ _Success_(return == 0) int SolitaireSort(
     for (size_t i = 0; i < MAX_RETRIES; ++i) // Can retry a maximum of three times before returning with error.
     {
         CardStack *result; // Will get assigned by TrySort
-        if (TrySort(data, size, result) == 0)
+        if (TrySort(result, data, size) == 0)
         {
             for (size_t i = 0; i < size; ++i)
             {

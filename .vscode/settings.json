@@ -4,6 +4,8 @@
         "*.graph": "eagraph",
         "*.cg": "eagraph",
         "solitaire-sort.h": "c",
-        "sal.h": "c"
+        "sal.h": "c",
+        "stdlib.h": "c",
+        "cstdlib": "c"
     }
 }
