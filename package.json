@@ -1,0 +1,26 @@
+{
+    "name": "solitaire-sort",
+    "displayName": "Solitaire Sort",
+    "description": "Sorting algorithm which plays a game of faux-solitare to order elements.",
+    "author": "Henry Wilder",
+    "license": "MIT",
+    "version": "0.0.1",
+    "repository": {
+      "type": "private"
+    },
+    "main": "./out/ts/solitaire-sort",
+    "scripts": {
+      "vscode:prepublish": "npm run compile",
+      "compile": "tsc -b",
+      "watch": "tsc -b -w",
+      "lint": "eslint ./src/ts ./src/js --ext .ts,.tsx,.js",
+      "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+    },
+    "devDependencies": {
+      "@types/node": "^16.11.7",
+      "@typescript-eslint/eslint-plugin": "^5.54.0",
+      "@typescript-eslint/parser": "^5.54.0",
+      "eslint": "^8.35.0",
+      "typescript": "^5.0.2"
+    }
+  }

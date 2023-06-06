@@ -1,5 +1,5 @@
 /**
- * @file solitaire-sort.ts
+ * @file solitaire-sort.js
  * @author Henry Wilder (henrythepony@gmail.com)
  * @brief Sorting algorithm which plays a game of faux-solitare to order elements.
  * @version 0.1
