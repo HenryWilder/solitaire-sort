@@ -17,7 +17,7 @@ int main()
         '4',
     };
     const int numItems = sizeof(data) / sizeof(card_t);
-    int success = SolitaireSort(data, numItems);
+    int success = SolitaireSort(((card_t **)(&data)), numItems);
     for (int i = 0; i < numItems; ++i)
     {
         printf("%c, ", data[i]);

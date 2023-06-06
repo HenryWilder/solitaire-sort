@@ -6,6 +6,9 @@
         "solitaire-sort.h": "c",
         "sal.h": "c",
         "stdlib.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "vector": "c",
+        "xstring": "c",
+        "xutility": "c"
     }
 }

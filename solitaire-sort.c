@@ -52,7 +52,7 @@ void ConstructStack(
     const size_t count,
     const size_t visible)
 {
-    stack->cards = malloc(count);
+    stack->cards = (card_t *)malloc(count);
     stack->numCards = count;
     stack->visible = visible;
 }
@@ -82,10 +82,10 @@ void PushToStack(
     const size_t start,
     const size_t count)
 {
-    const card_t *temp = stack->cards;
+    card_t *temp = stack->cards;
 
     const size_t newNumCards = stack->numCards + count;
-    stack->cards = malloc(newNumCards);
+    stack->cards = (card_t *)malloc(newNumCards);
 
     {
         size_t i = 0;
@@ -165,7 +165,7 @@ void Deal(
  * Treat output as boolean
  */
 char CheckOrdered(
-    _Inout_updates_all_(size) card_t *data[],
+    _In_reads_(size) const card_t *const data[],
     const size_t size)
 {
     for (size_t i = 1; i < size; ++i)
@@ -184,14 +184,17 @@ _Success_(return == 0) int TrySort(
     const size_t size)
 {
     Deck deck;
-    ConstructStack_FromList(&deck, &data, size);
+    ConstructStack(&deck, data, size, 0);
 
     Board board;
     Deal(&deck, &board);
 
     // todo
+    ConstructStack(result, data, size, 0);
 
-    CheckOrdered(result->cards, result->numCards);
+    // todo
+
+    CheckOrdered(&(result->cards), result->numCards);
 }
 
 _Success_(return == 0) int SolitaireSort(
@@ -200,17 +203,17 @@ _Success_(return == 0) int SolitaireSort(
 {
     for (size_t i = 0; i < MAX_RETRIES; ++i) // Can retry a maximum of three times before returning with error.
     {
-        CardStack *result; // Will get assigned by TrySort
-        if (TrySort(result, data, size) == 0)
+        CardStack result; // Will get assigned by TrySort
+        if (TrySort(&result, *data, size) == 0)
         {
             for (size_t i = 0; i < size; ++i)
             {
-                data[i] = result->cards[i];
+                (*data)[i] = result.cards[i];
             }
-            free(result);
+            DestructStack(&result);
             return 0;
         }
-        free(result);
+        DestructStack(&result);
     }
     return 1;
 }
