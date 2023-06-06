@@ -8,6 +8,9 @@
     "repository": {
       "type": "private"
     },
+	"engines": {
+		"node": "*"
+	},
     "main": "./out/ts/solitaire-sort",
     "scripts": {
       "vscode:prepublish": "npm run compile",
