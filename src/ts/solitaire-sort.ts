@@ -19,14 +19,35 @@ class CardStackBase {
  * A stack of cards.
  */
 class CardStack {
-    constructor(
+    public constructor(
         protected cards: Card[],
         public faceUp: number,
     ) { }
 
+    public get size(): number {
+        return this.cards.length;
+    }
+
+    public get faceUpCards(): Card[] {
+        return this.cards.slice(this.size - this.faceUp);
+    }
+
     public pushToTop(cards: Card[]): void {
-        this.cards.concat(cards)
+        this.cards = this.cards.concat(cards)
         this.faceUp += cards.length;
+    }
+
+    /**
+     * Removes the requested (visible) cards from the stack and returns them.
+     */
+    public pullFromTop(n: number): Card[] {
+        const result: Card[] = this.cards.slice(this.size - n);
+        this.cards.length = this.cards.length - n; // not sure if "-=" works with getter/setter
+        return result;
+    }
+
+    public reveal(n: number): void {
+        this.faceUp += n;
     }
 }
 
@@ -50,10 +71,10 @@ const transfer = (dest: CardStack, src: CardStack, n: number): void => {
         return;
     }
 
-    console.assert(src.cards.length >= n);
+    console.assert(src.size >= n);
     console.assert(src.faceUp >= n);
 
-    dest.concat
+    dest.pushToTop(src.pullFromTop(n));
 }
 
 export const solitaireSort = (data: Card[]) => {
