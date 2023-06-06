@@ -6,13 +6,15 @@
             "command": "g++",
             "args": [
                 "-Wall",
+                "-Wextra",
+                "-pedantic",
                 "example.c",
                 "solitaire-sort.c",
                 "-o",
                 "a.exe"
             ],
             "problemMatcher": {
-                "pattern":[
+                "pattern": [
                     {
                         "regexp": "^(.*):(\\d+):(\\d+): (warning|error): (.*)$",
                         "file": 1,
@@ -23,10 +25,7 @@
                     }
                 ]
             },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "Test Solitaire Sort",

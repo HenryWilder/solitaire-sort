@@ -3,6 +3,8 @@
 
 int main()
 {
+    printf("Program start");
+
     card_t data[] = {
         '1',
         '5',

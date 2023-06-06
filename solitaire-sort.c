@@ -165,7 +165,7 @@ void Deal(
  * Treat output as boolean
  */
 char CheckOrdered(
-    _In_reads_(size) const card_t *const data[],
+    _In_reads_(size) const card_t data[],
     const size_t size)
 {
     for (size_t i = 1; i < size; ++i)
@@ -194,7 +194,7 @@ _Success_(return == 0) int TrySort(
 
     // todo
 
-    CheckOrdered(&(result->cards), result->numCards);
+    CheckOrdered(result->cards, result->numCards);
 
     return 0;
 }
