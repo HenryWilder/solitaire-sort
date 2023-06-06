@@ -3,7 +3,7 @@
 
 int main()
 {
-    printf("Program start");
+    puts("Program start");
 
     card_t data[] = {
         '1',
@@ -19,10 +19,20 @@ int main()
         '4',
     };
     const int numItems = sizeof(data) / sizeof(card_t);
-    int success = SolitaireSort(((card_t **)(&data)), numItems);
+
+    puts("Unsorted");
     for (int i = 0; i < numItems; ++i)
     {
         printf("%c, ", data[i]);
     }
+
+    int success = SolitaireSort(((card_t **)(&data)), numItems);
+
+    puts("Sorted");
+    for (int i = 0; i < numItems; ++i)
+    {
+        printf("%c, ", data[i]);
+    }
+
     return success;
 }
