@@ -20,15 +20,29 @@ class CardStack {
         protected cards: Card[],
         public faceUp: number,
     ) { }
-
+    /**
+     * Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
+     */
     public get size(): number {
         return this.cards.length;
     }
 
+    public get faceDown(): number {
+        return this.size - this.faceUp;
+    }
+
+
+    /**
+     * Gives a readable list of all `faceUp` cards from the top of the stack.
+     */
     public get faceUpCards(): Card[] {
         return this.cards.slice(this.size - this.faceUp);
     }
 
+    /**
+     * Places `cards` on top of the stack. The new cards will be `faceUp`.\
+     * Existing `faceUp` cards on top of the stack will *remain* `faceUp`.
+     */
     public pushToTop(cards: Card[]): void {
         this.cards = this.cards.concat(cards)
         this.faceUp += cards.length;
@@ -43,8 +57,19 @@ class CardStack {
         return result;
     }
 
+    /**
+     * Makes `n`-**more** cards `faceUp`.
+     */
     public reveal(n: number): void {
         this.faceUp += n;
+    }
+
+
+    /**
+     * Makes `n`-**fewer** cards `faceUp`.
+     */
+    public conceal(n: number): void {
+        this.faceUp -= n;
     }
 }
 
@@ -52,6 +77,11 @@ class CardStack {
  * A CardStack that can have cards pushed to the bottom of the stack.
  */
 class Deck extends CardStack {
+
+    /**
+     * Slides `cards` underneath the stack. The new cards will **not** be `faceUp`.\
+     * Existing `faceUp` cards on top of the stack will *remain* `faceUp`.
+     */
     public pushToBottom(cards: Card[]): void {
         this.cards = cards.concat(this.cards);
     }
@@ -68,8 +98,8 @@ const transfer = (dest: CardStack, src: CardStack, n: number): void => {
         return;
     }
 
-    console.assert(src.size >= n);
-    console.assert(src.faceUp >= n);
+    console.assert(n <= src.size);
+    console.assert(n <= src.faceUp);
 
     dest.pushToTop(src.pullFromTop(n));
 }
