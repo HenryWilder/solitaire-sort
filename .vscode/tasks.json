@@ -2,16 +2,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build C Program",
+            "label": "Build Solitaire Sort in C",
             "command": "g++",
             "args": [
                 "-Wall",
                 "-Wextra",
                 "-pedantic",
-                "example.c",
-                "solitaire-sort.c",
+                "src\\c\\example.c",
+                "src\\c\\solitaire-sort.c",
                 "-o",
-                "a.exe"
+                "out\\c\\solitaire-sort-c.exe"
             ],
             "problemMatcher": {
                 "pattern": [
@@ -28,12 +28,9 @@
             "group": "build"
         },
         {
-            "label": "Test Solitaire Sort",
-            "command": "a.exe",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            }
+            "label": "Test Solitaire Sort in C",
+            "command": "out\\c\\solitaire-sort-c.exe",
+            "group": "test"
         }
     ]
 }
