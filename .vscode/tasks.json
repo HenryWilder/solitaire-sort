@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "command": "g++",
+    "args": [
+        "-Wall",
+        "example.c",
+        "solitaire-sort.c",
+        "-o",
+        "a.exe"
+    ],
+    "problemMatcher": {
+        "pattern":[
+            {
+                "regexp": "^(.*):(\\d+):(\\d+): (warning|error): (.*)$",
+                "file": 1,
+                "line": 2,
+                "column": 3,
+                "severity": 4,
+                "message": 5
+            }
+        ]
+    },
+    "group": {
+        "kind": "build",
+        "isDefault": true
+    }
+}
