@@ -1,0 +1,38 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TypeScript Version",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "node",
+            "args": [],
+            "outFiles": [
+                "${workspaceRoot}/out/ts/**/*.js"
+            ],
+            "preLaunchTask": {
+                "type": "npm",
+                "script": "watch"
+            }
+        },
+        {
+            "name": "JavaScript Version",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "node",
+            "args": [],
+            "outFiles": [
+                "${workspaceRoot}/out/js/**/*.js"
+            ]
+        },
+        {
+            "name": "Python Version",
+            "type": "python",
+            "request": "launch",
+            "program": "/src/py/solitaire-sort.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

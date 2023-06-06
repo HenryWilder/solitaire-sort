@@ -9,3 +9,5 @@ copyright: Copyright (c) 2023
 
 remark: This project is explicitly a joke and not meant for production.
 """
+
+print('Hello world')

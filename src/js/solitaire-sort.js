@@ -10,3 +10,4 @@
  * @remark This project is explicitly a joke and not meant for production.
  */
 
+console.log("Hello world");
