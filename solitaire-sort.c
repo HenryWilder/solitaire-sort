@@ -195,6 +195,8 @@ _Success_(return == 0) int TrySort(
     // todo
 
     CheckOrdered(&(result->cards), result->numCards);
+
+    return 0;
 }
 
 _Success_(return == 0) int SolitaireSort(
