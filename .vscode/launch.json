@@ -6,8 +6,8 @@
             "name": "TypeScript Version",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "node",
-            "args": [],
+            "program": "${workspaceRoot}/out/ts/example.js",
+            "console": "integratedTerminal",
             "outFiles": [
                 "${workspaceRoot}/out/ts/**/*.js"
             ],
@@ -21,16 +21,14 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "node",
-            "args": [],
-            "outFiles": [
-                "${workspaceRoot}/out/js/**/*.js"
-            ]
+            "program": "${workspaceRoot}/src/js/example.mjs",
+            "console": "integratedTerminal",
         },
         {
             "name": "Python Version",
             "type": "python",
             "request": "launch",
-            "program": "/src/py/solitaire-sort.py",
+            "program": "${workspaceRoot}/src/py/example.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
