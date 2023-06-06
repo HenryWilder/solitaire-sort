@@ -9,6 +9,8 @@ typedef char card_t;
  * @param data The char array.
  * @param size The size of the char array.
  */
-int SolitaireSort(card_t data[], const int size);
+_Success_(return == 0) int SolitaireSort(
+    _Inout_updates_all_(size) card_t *data[],
+    const size_t size);
 
 #endif
