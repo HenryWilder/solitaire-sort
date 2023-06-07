@@ -564,7 +564,7 @@ class Gamer {
             console.log(cleanLambda(opt.exec.toString()));
         }
         console.groupEnd();
-        console.log(`Selected move: ${highestScoredOption.exec.toString()}`);
+        console.log(`Selected move: ${cleanLambda(highestScoredOption.exec.toString())}`);
 
         highestScoredOption.exec();
 
