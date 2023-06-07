@@ -461,6 +461,24 @@ interface GameAction {
     exec: (() => void);
 }
 
+enum GameStatus {
+
+    /**
+     * No moves possible, didn't win.
+     */
+    Loss = 0,
+
+    /**
+     * Moves possible.
+     */
+    Playing = 1,
+
+    /**
+     * No moves possible, won.
+     */
+    Win = 2,
+}
+
 /**
  * AI player. Selects strategy based on rules.
  */
@@ -494,17 +512,20 @@ class Gamer {
      * Selects and performs a move in the game.
      * @returns Success. If false, no moves are possible and game should end.
      */
-    public tryMakeMove(): boolean {
+    public tryMakeMove(): GameStatus {
+
         const options: GameAction[] = this.getMoveOptions();
 
         if (options.length === 0) {
-            return false;
+            // Todo: add "win" condition
+            // Todo: Make sure infinite loops are caught and treated as losses.
+            return GameStatus.Loss;
         }
 
         const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
         highestScoredOption.exec();
 
-        return true;
+        return GameStatus.Playing;
     }
 }
 
@@ -519,15 +540,19 @@ const play = (data: Card[]): Card[] | null => {
     game.visualize();
     const gamer: Gamer = new Gamer(game);
 
-    let movesPossible: boolean = false;
-    do {
-        movesPossible = gamer.tryMakeMove();
-        // Todo: Make sure infinite loops are caught and treated as losses
-    } while (movesPossible)
+    while (true) {
+        switch (gamer.tryMakeMove()) {
 
-    // Todo: return null on loss
+            case GameStatus.Loss:
+                return null;
 
-    return game.foundation.flatMap(stack => stack.allCards);
+            case GameStatus.Playing:
+                break;
+
+            case GameStatus.Win:
+                return game.foundation.flatMap(stack => stack.allCards);
+        }
+    }
 }
 
 /**
