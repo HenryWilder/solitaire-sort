@@ -24,7 +24,7 @@ type Card = string;
 /**
  * A stack of cards on the field.
  * Has faceup and facedown cards.
- * 
+ *
  * @summary A stack.
  */
 class FieldStack {
@@ -98,7 +98,7 @@ class FieldStack {
             console.warn("Tried to pull 0 cards. Was this intentional?");
             return [];
         }
-        
+
         console.assert(n <= this.numCards);
         console.assert(n <= this.faceUp);
 
@@ -127,7 +127,7 @@ class FieldStack {
  * Only the top card is visible. Elements can only be added if they are greater than the card on top.
  * ! Hey wait a sec, how is this algorithm supposed to sort sparse arrays without knowing the correct order ahead of time?
  * ! Won't this run into the issue of being able to soft lock by placing, for example, a 10 on top of a 3, despite there being an 5 in the field?
- * 
+ *
  * @summary An append-only stack.
  */
 class FoundationStack {
@@ -168,7 +168,7 @@ class FoundationStack {
      * returning `false` is insufficient. If the cards being added are `<` the
      * {@linkcode FoundationStack.top|top}, **an exception will be thrown.**
      * @throws "Out of order" error - `cards` is not increasing in value or is of lesser value than {@linkcode FoundationStack.top|top}.
-     * 
+     *
      */
     public pushToTop(cards: Card | Card[]): void {
         if (Array.isArray(cards)) {
@@ -187,7 +187,7 @@ class FoundationStack {
  * A queue of cards that can have cards pushed to the bottom and pulled from the top.
  * Cards in the deck cannot be faceup, and all are facedown.
  * It is expected that the Deck only has its cards interacted with via the {@linkcode Hand}.
- * 
+ *
  * @summary A queue.
  */
 class Deck {
@@ -217,6 +217,7 @@ class Deck {
 
     /**
      * ## Only {@linkcode Hand} is intended use this.
+     * And Game, during setup.
      * ### It's not like anything is gonna break, it's just the rules of the game.
      * Removes and returns the requested number of cards from the queue.
      * @param n The number of cards to pull from the back of the queue.
@@ -225,15 +226,25 @@ class Deck {
         console.assert(n <= this.numCards);
         return this.cards.splice(-n);
     }
+
+    /**
+     * Randomizes the order of the elements.
+     */
+    public shuffle(): void {
+        for (let i = this.numCards - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]]; // Swaps elements i and j
+        }
+    }
 }
 
 /**
  * A bounded card stack that has a maximum capacity (of {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX}).
  * Only allows pulling one element at a time.
  * Random access is allowed when {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is `true`.
- * 
+ *
  * Cards cannot be pushed individually, and can only be given in the form of a `Deck`.
- * 
+ *
  * @summary A fixed-capacity vector.
  */
 class Hand {
@@ -281,7 +292,7 @@ class Hand {
     }
 
     /**
-     * Removes and returns the card at the provided index.  
+     * Removes and returns the card at the provided index.
      * Do not use if `cards` is empty.
      * @returns `null` if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is false.
      * @param index The zero-based index of the card to pull.
@@ -363,7 +374,52 @@ class Game {
      */
     public field: FieldStack[];
 
-    // Todo: Add any helpers needed
+    /**
+     * Deals out cards to the field.
+     * Each stack in the field gets one more card than the previous, and the first gets 1.
+     */
+    private dealToField(): void {
+        for (let i: number = 0; i < this.field.length; ++i) {
+            this.field[i].pushToTop(this.deck.pullFromTop(i + 1));
+        }
+    }
+
+    /**
+     * Sets up the game.
+     * 1. Shuffles the deck
+     * 2. Deals cards to the field
+     * 3. Deals cards to hand
+     */
+    public setup(): void {
+        this.deck.shuffle();
+        this.dealToField();
+        this.hand.draw(this.deck);
+    }
+
+    /**
+     * Prints a snapshot of the game to the console.
+     */
+    public visualize(): void {
+        console.group("snapshot");
+
+        console.log(`deck: ${this.deck.numCards} cards`);
+
+        console.log(`hand: ${this.hand.numCards} (out of ${this.hand.cardsInHand} max) cards: [[${this.hand.cardsInHand.join('][')}]]`);
+
+        console.group("field");
+        for (let i = 0; i < this.field.length; ++i) {
+            console.log(`${i}: ${this.field[i].numCards} cards\n  [${'[?]'.repeat(this.field[i].faceDown)}[${this.field[i].faceUpCards.join('][')}]]`);
+        }
+        console.groupEnd();
+
+        console.group("foundation");
+        for (let i = 0; i < this.foundation.length; ++i) {
+            console.log(`${i}: ${this.foundation[i].numCards} cards\n  top: [${this.foundation[i].top}]`);
+        }
+        console.groupEnd();
+
+        console.groupEnd();
+    }
 }
 
 /**
@@ -372,8 +428,11 @@ class Game {
  * @returns The sorted list.
  * @todo
  */
-const Play = (data: Card[]): Card[] => {
+const play = (data: Card[]): Card[] => {
     const game = new Game(data);
+    game.setup();
+
+    game.visualize();
 
     // Todo: Play the game
 
@@ -387,7 +446,7 @@ const Play = (data: Card[]): Card[] => {
  */
 export const solitaireSort = (data: Card[]): Card[] => {
     for (let i = 0; i < 3; ++i) {
-        Play(data); // Todo: Get information back from this
+        play(data); // Todo: Get information back from this
     }
     return data;
 }
