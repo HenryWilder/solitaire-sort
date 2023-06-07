@@ -30,7 +30,7 @@ class CardStack {
          * The list of cards in the stack.
          * The back (last element) is called the top, while the front (first element) is called the bottom.
          */
-        protected cards: Card[],
+        private cards: Card[],
         /**
          * The number of cards considered public, counts starting from the top (the back/last element)
          */
@@ -57,7 +57,7 @@ class CardStack {
      * Gives a readable list of all `faceUp` cards from the top of the stack.
      */
     public get faceUpCards(): Card[] {
-        return this.cards.slice(this.numCards - this.faceUp);
+        return this.cards.slice(-this.faceUp);
     }
 
     /**
@@ -82,16 +82,14 @@ class CardStack {
         }
         console.assert(n <= this.numCards);
         console.assert(n <= this.faceUp);
-        const result: Card[] = this.cards.slice(-n);
-        this.cards.length -= n;
-        return result;
+        return this.cards.splice(-n);
     }
 
     /**
      * Makes `n`-**more** cards `faceUp`.
      */
     public reveal(n: number): void {
-        console.assert((this.faceUp + n) <= this.numCards);
+        console.assert(n <= this.faceDown);
         this.faceUp += n;
     }
 
@@ -102,6 +100,23 @@ class CardStack {
         console.assert(n <= this.faceUp);
         this.faceUp -= n;
     }
+}
+
+/**
+ * Transfers `n` cards from `src` to `dest`.
+ * @param dest Destination stack. Cards will be added to this.
+ * @param src Source stack. Cards will be removed from this.
+ * @param n Number of cards to transfer. `src` will shrink by this number, `dest` will grow by this number.
+ */
+const transferStack = (dest: CardStack, src: CardStack, n: number): void => {
+    if (n === 0) {
+        return;
+    }
+
+    console.assert(n <= src.numCards);
+    console.assert(n <= src.faceUp);
+
+    dest.pushToTop(src.pullFromTop(n));
 }
 
 /**
@@ -118,9 +133,12 @@ class Deck {
          * The list of cards in the stack.
          * The back (last element) is called the top, while the front (first element) is called the bottom.
          */
-        protected cards: Card[],
+        private cards: Card[],
     ) { }
 
+    /**
+     * The total number of cards in the deck.
+     */
     get numCards(): number {
         return this.cards.length;
     }
@@ -140,13 +158,8 @@ class Deck {
      * @param n The number of cards to pull from the back of the queue.
      */
     public pullFromTop(n: number): Card[] {
-        if (n === 0) {
-            return [];
-        }
         console.assert(n <= this.numCards);
-        const result: Card[] = this.cards.slice(-n);
-        this.cards.length -= n;
-        return result;
+        return this.cards.splice(-n);
     }
 }
 
@@ -160,6 +173,7 @@ class Deck {
  * @summary A fixed-capacity vector.
  */
 class Hand {
+
     public constructor(
         /**
          * The list of cards in the stack.
@@ -194,15 +208,7 @@ class Hand {
         console.assert(this.numCards > 0);
         console.assert(index < this.numCards);
 
-        // ? I'm curious if it would be better to just use splice
-
-        if (index === 0) {
-            return this.cards.shift()!;
-        } else if (index === (this.numCards - 1)) {
-            return this.cards.pop()!;
-        } else {
-            return this.cards.splice(index, 1)![0];
-        }
+        return this.cards.splice(index, 1)![0];
     }
 
     /**
@@ -217,7 +223,7 @@ class Hand {
     /**
      * Draws a new set of cards from the deck.
      * Passes the full contents of the hand to the bottom of the deck, then pulls
-     * {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} cards from the top of the deck to insert back into the hand.
+     * {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX} cards from the top of the deck to insert back into the hand.
      * If the deck has fewer than {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX} cards,
      * the entire remaining deck will be emptied into the hand.
      */
@@ -231,17 +237,28 @@ class Hand {
  * Transfers `n` cards from `src` to `dest`.
  * @param dest Destination stack. Cards will be added to this.
  * @param src Source stack. Cards will be removed from this.
- * @param n Number of cards to transfer. `src` will shrink by this number, `dest` will grow by this number.
+ * @param index The zero-based index of the card to take from the hand.
+ * **Only allowed if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is true.**
  */
-const transfer = (dest: CardStack | Deck, src: CardStack | Deck, n: number): void => {
-    if (n === 0) {
-        return;
+const transferFromHand = (dest: CardStack, src: Hand, index: number | undefined): void => {
+
+    console.assert(src.numCards > 0);
+
+    if (index === undefined) {
+
+        dest.pushToTop([src.pull()]);
+
+    } else {
+
+        // Guard
+        if (!rules.HAND_ALLOW_RANDOM_ACCESS) {
+            console.error("Random Hand access is currently disallowed by the HAND_ALLOW_RANDOM_ACCESS rule. Transfer has been aborted.");
+            return;
+        }
+
+        console.assert(index < src.numCards);
+        dest.pushToTop([src.pullAt(index)!]);
     }
-
-    console.assert(n <= src.numCards);
-    console.assert(n <= src.faceUp);
-
-    dest.pushToTop(src.pullFromTop(n));
 }
 
 /**
