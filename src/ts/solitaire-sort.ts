@@ -439,15 +439,23 @@ class Game {
 }
 
 /**
+ * AI player. Selects strategy based on rules.
+ */
+class Gamer {
+
+}
+
+/**
  * Plays a game of solitaire.
  * @param data The input cards.
  * @returns The sorted list.
  * @todo
  */
 const play = (data: Card[]): Card[] => {
-    const game = new Game(data);
+    const game: Game = new Game(data);
     game.setup();
     game.visualize();
+    const gamer: Gamer = new Gamer();
 
     // Todo: Play the game
 
@@ -460,8 +468,14 @@ const play = (data: Card[]): Card[] => {
  * @todo
  */
 export const solitaireSort = (data: Card[]): Card[] => {
-    for (let i = 0; i < 3; ++i) {
-        play(data.map(e => e)); // Todo: Get information back from this
+    const maxTries: number = 3;
+    for (let i = 0; i < maxTries; ++i) {
+        const sorted: Card[] = play(data.map(e => e));
+        const success: boolean = false;
+        // Todo: Check if successful.
+        if (success) {
+            return sorted;
+        }
     }
-    return data;
+    throw new Error(`Lost ${maxTries} times. Not retrying.`);
 }
