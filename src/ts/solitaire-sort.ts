@@ -402,19 +402,35 @@ class Game {
     public visualize(): void {
         console.group("snapshot");
 
-        console.log(`deck: ${this.deck.numCards} cards`);
+        if (this.deck.numCards > 0) {
+            console.log(`deck: ${this.deck.numCards} cards`);
+        } else {
+            console.log(`deck: empty`);
+        }
 
-        console.log(`hand: ${this.hand.numCards} (out of ${this.hand.cardsInHand} max) cards: [[${this.hand.cardsInHand.join('][')}]]`);
+        if (this.hand.numCards > 0) {
+            console.log(`hand: ${this.hand.numCards} (out of ${Hand.maxCards} max) cards: [[${this.hand.cardsInHand.join('][')}]]`);
+        } else {
+            console.log(`hand: empty (${Hand.maxCards} max)`);
+        }
 
         console.group("field");
         for (let i = 0; i < this.field.length; ++i) {
-            console.log(`${i}: ${this.field[i].numCards} cards\n  [${'[?]'.repeat(this.field[i].faceDown)}[${this.field[i].faceUpCards.join('][')}]]`);
+            if (this.field[i].numCards > 0) {
+                console.log(`${i}: ${this.field[i].numCards} cards: [${'[?]'.repeat(this.field[i].faceDown)}[${this.field[i].faceUpCards.join('][')}]]`);
+            } else {
+                console.log(`${i}: empty`);
+            }
         }
         console.groupEnd();
 
         console.group("foundation");
         for (let i = 0; i < this.foundation.length; ++i) {
-            console.log(`${i}: ${this.foundation[i].numCards} cards\n  top: [${this.foundation[i].top}]`);
+            if (this.foundation[i].numCards > 0) {
+                console.log(`${i}: ${this.foundation[i].numCards} cards: top: [${this.foundation[i].top}]`);
+            } else {
+                console.log(`${i}: empty`);
+            }
         }
         console.groupEnd();
 
