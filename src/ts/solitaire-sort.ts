@@ -442,7 +442,7 @@ class Game {
  * Call as a function to execute the move.
  * @param game The game to make a move in. **Will have its contents modified.**
  */
-type GameAction = () => void;
+type GameAction = (() => void);
 
 /**
  * AI player. Selects strategy based on rules.
@@ -455,11 +455,9 @@ class Gamer {
          */
         private game: Game,
     ) {
-        if (Hand.isRandomAccess) {
-            this.getMoveOptions = this._getMoveOptions_randomAccess;
-        } else {
-            this.getMoveOptions = this._getMoveOptions_topAccess;
-        }
+        this.getMoveOptions = Hand.isRandomAccess
+            ? this._getMoveOptions_randomAccess
+            : this.getMoveOptions = this._getMoveOptions_topAccess;
     }
 
     /**
