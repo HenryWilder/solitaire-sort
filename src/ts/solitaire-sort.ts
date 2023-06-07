@@ -334,7 +334,6 @@ class Hand {
 
 /**
  * Storage for gameplay elements.
- * @todo
  */
 class Game {
 
@@ -440,6 +439,7 @@ class Game {
 
 /**
  * AI player. Selects strategy based on rules.
+ * @todo
  */
 class Gamer {
 
