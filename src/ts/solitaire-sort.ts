@@ -181,23 +181,6 @@ class FoundationStack {
 }
 
 /**
- * Transfers `n` cards from `src` to `dest`.
- * @param dest Destination stack. Cards will be added to this.
- * @param src Source stack. Cards will be removed from this.
- * @param n Number of cards to transfer. `src` will shrink by this number, `dest` will grow by this number.
- */
-const transferStack = (dest: FieldStack, src: FieldStack, n: number): void => {
-    if (n === 0) {
-        return;
-    }
-
-    console.assert(n <= src.numCards);
-    console.assert(n <= src.faceUp);
-
-    dest.pushToTop(src.pullFromTop(n));
-}
-
-/**
  * A queue of cards that can have cards pushed to the bottom and pulled from the top.
  * Cards in the deck cannot be faceup, and all are facedown.
  * It is expected that the Deck only has its cards interacted with via the {@linkcode Hand}.
@@ -332,34 +315,6 @@ class Hand {
     public draw(deck: Deck): void {
         deck.pushToBottom(this.cards);
         this.cards = deck.pullFromTop(Math.min(rules.HAND_SIZE_MAX, deck.numCards));
-    }
-}
-
-/**
- * Transfers `n` cards from `src` to `dest`.
- * @param dest Destination stack. Cards will be added to this.
- * @param src Source stack. Cards will be removed from this.
- * @param index The zero-based index of the card to take from the hand.
- * **Only allowed if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is true.**
- */
-const transferFromHand = (dest: FieldStack, src: Hand, index: number | undefined): void => {
-
-    console.assert(src.numCards > 0);
-
-    if (index === undefined) {
-
-        dest.pushToTop([src.pull()]);
-
-    } else {
-
-        // Guard
-        if (!rules.HAND_ALLOW_RANDOM_ACCESS) {
-            console.error("Random Hand access is currently disallowed by the HAND_ALLOW_RANDOM_ACCESS rule. Transfer has been aborted.");
-            return;
-        }
-
-        console.assert(index < src.numCards);
-        dest.pushToTop([src.pullAt(index)!]);
     }
 }
 
