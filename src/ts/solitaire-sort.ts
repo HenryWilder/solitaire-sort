@@ -13,8 +13,11 @@
 import { rules } from "./solitaire-sort-rules";
 
 /**
- * A "card".
- * Meant to be equivalent to a `char` in C.
+ * An abstraction for a unit of data used in the algorithm.
+ *
+ * ---
+ *
+ * Currently implemented as a string--intended to be treated as a C/C++ `char`.
  */
 type Card = string;
 
