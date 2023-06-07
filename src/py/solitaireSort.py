@@ -11,9 +11,11 @@ remark: This project is explicitly a joke and not meant for production.
 """
 
 class _CardStack:
-    def __init__(self, cards: list = [], visible: int = 0):
-        self.cards: list = cards
-        self.visible: int = visible
+    def __init__(self, cards: list = [], faceUp: int = 0):
+        self._cards: list = cards
+        self.faceUp: int = faceUp
+
+    
 
 def solitaireSort(cards: list):
     """

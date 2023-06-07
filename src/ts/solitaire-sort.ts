@@ -17,9 +17,17 @@ type Card = string;
  */
 class CardStack {
     public constructor(
+        /**
+         * The list of cards in the stack.
+         * The back (last element) is called the top, while the front (first element) is called the bottom.
+         */
         protected cards: Card[],
+        /**
+         * The number of cards considered public, counts starting from the top (the back/last element)
+         */
         public faceUp: number,
     ) { }
+
     /**
      * Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
      */
@@ -27,10 +35,12 @@ class CardStack {
         return this.cards.length;
     }
 
+    /**
+     * Tells how many `faceDown` cards are in the stack - only cards that are not `faceUp`.
+     */
     public get faceDown(): number {
         return this.size - this.faceUp;
     }
-
 
     /**
      * Gives a readable list of all `faceUp` cards from the top of the stack.
@@ -44,16 +54,25 @@ class CardStack {
      * Existing `faceUp` cards on top of the stack will *remain* `faceUp`.
      */
     public pushToTop(cards: Card[]): void {
+        if (cards.length === 0) {
+            return;
+        }
         this.cards = this.cards.concat(cards)
         this.faceUp += cards.length;
     }
 
     /**
      * Removes the requested (visible) cards from the stack and returns them.
+     * Don't use this for non-visible cards.
      */
     public pullFromTop(n: number): Card[] {
-        const result: Card[] = this.cards.slice(this.size - n);
-        this.cards.length = this.cards.length - n; // not sure if "-=" works with getter/setter
+        if (n === 0) {
+            return [];
+        }
+        console.assert(this.size >= n);
+        console.assert(this.faceUp >= n);
+        const result: Card[] = this.cards.slice(-n);
+        this.cards.length -= n;
         return result;
     }
 
@@ -69,6 +88,7 @@ class CardStack {
      * Makes `n`-**fewer** cards `faceUp`.
      */
     public conceal(n: number): void {
+        console.assert(this.faceUp >= n);
         this.faceUp -= n;
     }
 }
@@ -93,7 +113,7 @@ class Deck extends CardStack {
  * @param src Source stack. Cards will be removed from this.
  * @param n Number of cards to transfer. `src` will shrink by this number, `dest` will grow by this number.
  */
-const transfer = (dest: CardStack, src: CardStack, n: number): void => {
+const transfer = (dest: CardStack | Deck, src: CardStack | Deck, n: number): void => {
     if (n === 0) {
         return;
     }
@@ -104,6 +124,10 @@ const transfer = (dest: CardStack, src: CardStack, n: number): void => {
     dest.pushToTop(src.pullFromTop(n));
 }
 
+/**
+ * Sorts the data by playing a game of faux-solitaire.
+ * @param data The list of cards to be sorted.
+ */
 export const solitaireSort = (data: Card[]) => {
     console.log("Hello world");
 }
