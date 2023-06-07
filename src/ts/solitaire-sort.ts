@@ -448,10 +448,10 @@ class Gamer {
 /**
  * Plays a game of solitaire.
  * @param data The input cards.
- * @returns The sorted list.
+ * @returns The sorted list. Returns `null` if lost.
  * @todo
  */
-const play = (data: Card[]): Card[] => {
+const play = (data: Card[]): Card[] | null => {
     const game: Game = new Game(data);
     game.setup();
     game.visualize();
@@ -465,15 +465,12 @@ const play = (data: Card[]): Card[] => {
 /**
  * Sorts the data by playing a game of faux-solitaire.
  * @param data The list of cards to be sorted.
- * @todo
  */
 export const solitaireSort = (data: Card[]): Card[] => {
     const maxTries: number = 3;
     for (let i = 0; i < maxTries; ++i) {
-        const sorted: Card[] = play(data.map(e => e));
-        const success: boolean = false;
-        // Todo: Check if successful.
-        if (success) {
+        const sorted: Card[] | null = play(data.map(e => e));
+        if (sorted !== null) {
             return sorted;
         }
     }
