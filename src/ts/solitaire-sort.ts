@@ -19,11 +19,12 @@ import { rules } from "./solitaire-sort-rules";
 type Card = string;
 
 /**
- * A stack of cards.
+ * A stack of cards on the field.
+ * Has faceup and facedown cards.
  * 
  * @summary A stack.
  */
-class CardStack {
+class FieldStack {
 
     public constructor(
         /**
@@ -64,24 +65,40 @@ class CardStack {
      * Places `cards` on top of the stack. The new cards will be `faceUp`.\
      * Existing `faceUp` cards on top of the stack will *remain* `faceUp`.
      */
-    public pushToTop(cards: Card[]): void {
-        if (cards.length === 0) {
-            return;
+    public pushToTop(cards: Card | Card[]): void {
+        if (Array.isArray(cards)) {
+            if (cards.length === 0) {
+                console.warn("Tried to push 0 cards. Was this intentional?");
+                return;
+            }
+            this.cards = this.cards.concat(cards)
+            this.faceUp += cards.length;
+        } else {
+            this.cards.push(cards);
+            ++this.faceUp;
         }
-        this.cards = this.cards.concat(cards)
-        this.faceUp += cards.length;
     }
 
     /**
      * Removes the requested (visible) cards from the stack and returns them.
      * Don't use this for non-visible cards.
+     * @param n The number of cards to pull from the top. If `undefined`, returns the top card singularly instead of as an array.
      */
-    public pullFromTop(n: number): Card[] {
+    public pullFromTop(n: number | undefined): Card | Card[] {
+
+        if (n === undefined) {
+            console.assert(this.numCards >= 1);
+            return this.cards.pop()!;
+        }
+
         if (n === 0) {
+            console.warn("Tried to pull 0 cards. Was this intentional?");
             return [];
         }
+        
         console.assert(n <= this.numCards);
         console.assert(n <= this.faceUp);
+
         return this.cards.splice(-n);
     }
 
@@ -103,25 +120,64 @@ class CardStack {
 }
 
 /**
- * A set of `CardStack`s used as the destination for sorted sets.
- * Only has 1 stack is used in this implementation.
+ * A stack of cards on the foundation.
+ * Only the top card is visible. Elements can only be added if they are greater than the card on top.
+ * ! Hey wait a sec, how is this algorithm supposed to sort sparse arrays without knowing the correct order ahead of time?
+ * ! Won't this run into the issue of being able to soft lock by placing, for example, a 10 on top of a 3, despite there being an 5 in the field?
+ * 
+ * @summary An append-only stack.
  */
-interface Foundation {
-    0: CardStack,
-}
+class FoundationStack {
+    public constructor(
+        /**
+         * The list of cards in the stack.
+         * The back (last element) is called the top, while the front (first element) is called the bottom.
+         */
+        private cards: Card[] = [],
+    ) { }
 
-/**
- * A set of 8 `CardStack` columns.
- */
-interface Field {
-    0: CardStack,
-    1: CardStack,
-    2: CardStack,
-    3: CardStack,
-    4: CardStack,
-    5: CardStack,
-    6: CardStack,
-    7: CardStack,
+    /**
+     * Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
+     */
+    public get numCards(): number {
+        return this.cards.length;
+    }
+
+    /**
+     * A readable copy of the visible card on top of the stack.
+     */
+    public get top(): Card {
+        console.assert(this.numCards !== 0);
+        return this.cards[this.numCards - 1];
+    }
+
+    /**
+     * A readable copy of the stack's cards.
+     */
+    public get all(): Card[] {
+        return this.cards;
+    }
+
+    /**
+     * Places `cards` on top of the stack.
+     * @param cards The cards to push to the stack. **Must be in order**.\
+     * Because it is likely the cards will have already been removed from their source,
+     * returning `false` is insufficient. If the cards being added are `<` the
+     * {@linkcode FoundationStack.top|top}, **an exception will be thrown.**
+     * @throws "Out of order" error - `cards` is not increasing in value or is of lesser value than {@linkcode FoundationStack.top|top}.
+     * 
+     */
+    public pushToTop(cards: Card | Card[]): void {
+        if (Array.isArray(cards)) {
+            if (cards.length === 0) {
+                console.warn("Tried to push 0 cards. Was this intentional?");
+                return;
+            }
+            this.cards = this.cards.concat(cards)
+        } else {
+            this.cards.push(cards);
+        }
+    }
 }
 
 /**
@@ -130,7 +186,7 @@ interface Field {
  * @param src Source stack. Cards will be removed from this.
  * @param n Number of cards to transfer. `src` will shrink by this number, `dest` will grow by this number.
  */
-const transferStack = (dest: CardStack, src: CardStack, n: number): void => {
+const transferStack = (dest: FieldStack, src: FieldStack, n: number): void => {
     if (n === 0) {
         return;
     }
@@ -207,6 +263,13 @@ class Hand {
     }
 
     /**
+     * A readable list of the cards in the hand.
+     */
+    public get cardsInHand(): Card[] {
+        return this.cards;
+    }
+
+    /**
      * Tells whether the Hand is allowed random access for cards.
      * @see {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS}
      * @see {@linkcode Hand.pullAt|pullAt}
@@ -279,7 +342,7 @@ class Hand {
  * @param index The zero-based index of the card to take from the hand.
  * **Only allowed if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is true.**
  */
-const transferFromHand = (dest: CardStack, src: Hand, index: number | undefined): void => {
+const transferFromHand = (dest: FieldStack, src: Hand, index: number | undefined): void => {
 
     console.assert(src.numCards > 0);
 
@@ -304,49 +367,60 @@ const transferFromHand = (dest: CardStack, src: Hand, index: number | undefined)
  * Storage for gameplay elements.
  */
 class Game {
-    /**
-     * The source of cards.
-     */
-    public deck: Deck;
-    /**
-     * The "working memory" of the deck.
-     */
-    public hand: Hand;
-    /**
-     * The destination of sorted stacks.
-     */
-    public foundation: Foundation;
-    /**
-     * The destination
-     */
-    public field: Field;
 
     public constructor(deck: Card[]) {
         this.deck = new Deck(deck);
         this.hand = new Hand();
-        this.foundation = [new CardStack()];
+        this.foundation = [new FoundationStack()];
         this.field = [
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
-            new CardStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
+            new FieldStack(),
         ];
     }
+
+    /**
+     * The source of cards.
+     */
+    public deck: Deck;
+
+    /**
+     * The "working memory" of the deck.
+     */
+    public hand: Hand;
+
+    /**
+     * The destination of sorted stacks.
+     */
+    public foundation: FoundationStack[];
+
+    /**
+     * The destination
+     */
+    public field: FieldStack[];
+
 }
 
-const Play = (data: Card[]) => {
+/**
+ * Plays a game of solitaire.
+ * @param data The input cards.
+ * @returns The sorted list.
+ */
+const Play = (data: Card[]): Card[] => {
     const game = new Game(data);
+    return game.foundation.flatMap(stack => stack.);
 }
 
 /**
  * Sorts the data by playing a game of faux-solitaire.
  * @param data The list of cards to be sorted.
  */
-export const solitaireSort = (data: Card[]) => {
+export const solitaireSort = (data: Card[]): Card[] => {
     for (let i = 0; i < 3; ++i) {
         Play(data);
     }
