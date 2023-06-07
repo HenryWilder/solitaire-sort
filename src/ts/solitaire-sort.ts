@@ -539,19 +539,19 @@ class Gamer {
         const options: GameAction[] = this.getMoveOptions();
 
         if (options.length === 0) {
-            // Todo: add "win" condition
+            // Todo: Add "win" condition
             // Todo: Make sure infinite loops are caught and treated as losses.
             return GameStatus.Loss;
         }
+        const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
 
         console.group("move options")
         for (const opt of options) {
             console.log(opt.exec.toString());
         }
         console.groupEnd();
-
-        const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
         console.log(`Selected move: ${highestScoredOption.exec.toString()}`);
+
         highestScoredOption.exec();
 
         return GameStatus.Playing;
