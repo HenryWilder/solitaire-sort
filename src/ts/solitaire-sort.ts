@@ -30,11 +30,11 @@ class CardStack {
          * The list of cards in the stack.
          * The back (last element) is called the top, while the front (first element) is called the bottom.
          */
-        private cards: Card[],
+        private cards: Card[] = [],
         /**
          * The number of cards considered public, counts starting from the top (the back/last element)
          */
-        public faceUp: number,
+        public faceUp: number = 0,
     ) {
         console.assert(this.faceUp <= this.numCards);
     }
@@ -103,6 +103,28 @@ class CardStack {
 }
 
 /**
+ * A set of `CardStack`s used as the destination for sorted sets.
+ * Only has 1 stack is used in this implementation.
+ */
+interface Foundation {
+    0: CardStack,
+}
+
+/**
+ * A set of 8 `CardStack` columns.
+ */
+interface Field {
+    0: CardStack,
+    1: CardStack,
+    2: CardStack,
+    3: CardStack,
+    4: CardStack,
+    5: CardStack,
+    6: CardStack,
+    7: CardStack,
+}
+
+/**
  * Transfers `n` cards from `src` to `dest`.
  * @param dest Destination stack. Cards will be added to this.
  * @param src Source stack. Cards will be removed from this.
@@ -133,7 +155,7 @@ class Deck {
          * The list of cards in the stack.
          * The back (last element) is called the top, while the front (first element) is called the bottom.
          */
-        private cards: Card[],
+        private cards: Card[] = [],
     ) { }
 
     /**
@@ -179,9 +201,26 @@ class Hand {
          * The list of cards in the stack.
          * The back (last element) is called the top, while the front (first element) is called the bottom.
          */
-        protected cards: Card[],
+        private cards: Card[] = [],
     ) {
         console.assert(cards.length <= rules.HAND_SIZE_MAX);
+    }
+
+    /**
+     * Tells whether the Hand is allowed random access for cards.
+     * @see {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS}
+     * @see {@linkcode Hand.pullAt|pullAt}
+     */
+    public static get isRandomAccess(): boolean {
+        return rules.HAND_ALLOW_RANDOM_ACCESS;
+    }
+
+    /**
+     * The maximum capacity of the Hand.
+     * @see {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX}
+     */
+    public static get maxCards(): number {
+        return rules.HAND_SIZE_MAX;
     }
 
     /**
@@ -262,9 +301,53 @@ const transferFromHand = (dest: CardStack, src: Hand, index: number | undefined)
 }
 
 /**
+ * Storage for gameplay elements.
+ */
+class Game {
+    /**
+     * The source of cards.
+     */
+    public deck: Deck;
+    /**
+     * The "working memory" of the deck.
+     */
+    public hand: Hand;
+    /**
+     * The destination of sorted stacks.
+     */
+    public foundation: Foundation;
+    /**
+     * The destination
+     */
+    public field: Field;
+
+    public constructor(deck: Card[]) {
+        this.deck = new Deck(deck);
+        this.hand = new Hand();
+        this.foundation = [new CardStack()];
+        this.field = [
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+            new CardStack(),
+        ];
+    }
+}
+
+const Play = (data: Card[]) => {
+    const game = new Game(data);
+}
+
+/**
  * Sorts the data by playing a game of faux-solitaire.
  * @param data The list of cards to be sorted.
  */
 export const solitaireSort = (data: Card[]) => {
-    console.log("Hello world");
+    for (let i = 0; i < 3; ++i) {
+        Play(data);
+    }
 }
