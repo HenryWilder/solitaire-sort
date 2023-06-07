@@ -438,40 +438,68 @@ class Game {
 }
 
 /**
+ * A performable move in the game.
+ * Call as a function to execute the move.
+ * @param game The game to make a move in. **Will have its contents modified.**
+ */
+type GameAction = (game: Game) => void;
+
+/**
  * AI player. Selects strategy based on rules.
- * @todo
  */
 class Gamer {
-    public constructor() {
+    public constructor(
+        /**
+         * Personal reference to the game so we don't have to constantly pass it around.
+         */
+        private game: Game,
+    ) {
         if (Hand.isRandomAccess) {
-            this.makeMove = this.makeMove_randomAccess;
+            this.getMoveOptions = this._getMoveOptions_randomAccess;
         } else {
-            this.makeMove = this.makeMove_topAccess;
+            this.getMoveOptions = this._getMoveOptions_topAccess;
         }
     }
 
     /**
-     * Makes a move in the game. Uses random access rules.
-     * @param game The game to make a move in. **Will have contents modified.**
+     * Returns a list of the possible moves in the gamestate.
+     * If the result is an empty array, no moves are possible and the game should end.
      */
-    private makeMove_randomAccess(game: Game): void {
-
+    private _getMoveOptions_randomAccess(): GameAction[] {
+        return [];
     }
 
     /**
-     * Makes a move in the game. Uses top access rules.
-     * @param game The game to make a move in. **Will have contents modified.**
+     * Returns a list of the possible moves in the gamestate.
+     * If the result is an empty array, no moves are possible and the game should end.
      */
-    private makeMove_topAccess(game: Game): void {
-
+    private _getMoveOptions_topAccess(): GameAction[] {
+        return [];
     }
 
     /**
-     * Makes a move in the game. **Modifies game.**
-     * @param game The game to make a move in. **Will have contents modified.**
+     * Returns a list of the possible moves in the gamestate.
+     * If the result is an empty array, no moves are possible and the game should end.
      */
-    public makeMove(game: Game): void {
-        throw new Error("Using uninitialized makeMove method");
+    private getMoveOptions(): GameAction[] {
+        throw new Error("Using uninitialized getMoveOptions method");
+    }
+
+    /**
+     * Selects and performs a move in the game.
+     * @returns Success. If false, no moves are possible and game should end.
+     */
+    public tryMakeMove(): boolean {
+        const options: GameAction[] = this.getMoveOptions();
+
+        if (options.length === 0) {
+            return false;
+        }
+
+        // todo: select a more favorable move
+        options[0](this.game);
+
+        return true;
     }
 }
 
@@ -479,17 +507,20 @@ class Gamer {
  * Plays a game of solitaire.
  * @param data The input cards.
  * @returns The sorted list. Returns `null` if lost.
- * @todo
  */
 const play = (data: Card[]): Card[] | null => {
     const game: Game = new Game(data);
     game.setup();
     game.visualize();
-    const gamer: Gamer = new Gamer();
+    const gamer: Gamer = new Gamer(game);
 
-    gamer.makeMove(game);
+    let movesPossible: boolean = false;
+    do {
+        movesPossible = gamer.tryMakeMove();
+        // Todo: Make sure infinite loops are caught and treated as losses
+    } while (movesPossible)
 
-    // Todo: Play the game
+    // Todo: return null on loss
 
     return game.foundation.flatMap(stack => stack.all);
 }
