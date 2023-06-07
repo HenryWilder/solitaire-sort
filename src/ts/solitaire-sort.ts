@@ -532,6 +532,11 @@ interface GameAction {
      * Perform the action.
      */
     exec: (() => void);
+
+    /**
+     *
+     */
+    debug: string;
 }
 
 enum GameStatus {
@@ -592,9 +597,8 @@ class Gamer {
                     if (stackable(destTop, moveableCards[num])) {
                         options.push({
                             score: 1,
-                            exec: () => {
-                                dest.pushToTop(src.pullFromTop(num + 1));
-                            }
+                            exec: () => dest.pushToTop(src.pullFromTop(num + 1)),
+                            debug: `Move `,
                         });
                         break;
                     }

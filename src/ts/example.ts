@@ -1,8 +1,9 @@
 import { Card, solitaireSort } from "./solitaire-sort";
 
 const data: Card[] = [];
+const cardOptions: string = "A234567890JQK";
 for (let i = 0; i < 52; ++i) {
-    data.push("A234567890JQK"[Math.floor(Math.random() * 13)] as Card);
+    data.push(cardOptions[i % cardOptions.length] as Card);
 }
 try {
     solitaireSort(data);
