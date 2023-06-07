@@ -448,7 +448,17 @@ class Game {
  * A performable move in the game.
  * Call as a function to execute the move.
  */
-type GameAction = (() => void);
+interface GameAction {
+    /**
+     * Value of playing this move.
+     */
+    score: number;
+
+    /**
+     *
+     */
+    exec: () => void;
+}
 
 /**
  * AI player. Selects strategy based on rules.
@@ -490,8 +500,8 @@ class Gamer {
             return false;
         }
 
-        // todo: select a more favorable move
-        options[0]();
+        const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
+        highestScoredOption.exec();
 
         return true;
     }
