@@ -1,7 +1,7 @@
-import { solitaireSort } from "./solitaire-sort";
+import { Card, solitaireSort } from "./solitaire-sort";
 
-const data: string[] = [];
+const data: Card[] = [];
 for (let i = 0; i < 52; ++i) {
-    data.push("A234567890JQK"[Math.floor(Math.random() * 13)])
+    data.push("A234567890JQK"[Math.floor(Math.random() * 13)] as Card);
 }
 solitaireSort(data);

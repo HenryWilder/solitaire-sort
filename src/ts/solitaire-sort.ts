@@ -19,11 +19,15 @@ import { rules } from "./solitaire-sort-rules";
  *
  * Currently implemented as a string of
  * ```
- * /^(A|[2-9]|0|J|Q|K)$/
+ * /^[A2-90JQK]$/
  * ```
  * (uses 0 instead of 10)
  */
-type Card = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '0' | 'J' | 'Q' | 'K';
+export type Card = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '0' | 'J' | 'Q' | 'K';
+
+export const isCard = (x: any): x is Card => {
+    return /^[A2-90JQK]$/.test(x);
+};
 
 /**
  * Compares two instances of `Card` to see what order they should be in.
