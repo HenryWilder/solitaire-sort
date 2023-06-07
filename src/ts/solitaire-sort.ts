@@ -13,6 +13,16 @@
 import { rules } from "./solitaire-sort-rules";
 
 /**
+ * A helper for removing the leading indent of a lambda function.
+ */
+const cleanLambda = (lambdaString: string) => {
+    const lastLine = lambdaString.slice(lambdaString.lastIndexOf('\n'));
+    const spacesInLastLine = lastLine.indexOf('}') - 1;
+    const rx = new RegExp(`^\\s{${spacesInLastLine}}`, 'gm');
+    return lambdaString.replace(rx, '');
+}
+
+/**
  * An abstraction for a unit of data used in the algorithm.
  *
  * ---
@@ -551,7 +561,7 @@ class Gamer {
 
         console.group("move options")
         for (const opt of options) {
-            console.log(opt.exec.toString());
+            console.log(cleanLambda(opt.exec.toString()));
         }
         console.groupEnd();
         console.log(`Selected move: ${highestScoredOption.exec.toString()}`);
