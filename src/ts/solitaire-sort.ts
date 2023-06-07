@@ -457,7 +457,7 @@ class Gamer {
     ) {
         this.getMoveOptions = Hand.isRandomAccess
             ? this._getMoveOptions_randomAccess
-            : this.getMoveOptions = this._getMoveOptions_topAccess;
+            : this._getMoveOptions_topAccess;
     }
 
     /**
