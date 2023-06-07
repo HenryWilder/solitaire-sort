@@ -465,7 +465,9 @@ class Gamer {
      * If the result is an empty array, no moves are possible and the game should end.
      */
     private _getMoveOptions_randomAccess(): GameAction[] {
-        return [];
+        const options: GameAction[] = [];
+        // Todo: add legal moves to options
+        return options;
     }
 
     /**
@@ -473,7 +475,9 @@ class Gamer {
      * If the result is an empty array, no moves are possible and the game should end.
      */
     private _getMoveOptions_topAccess(): GameAction[] {
-        return [];
+        const options: GameAction[] = [];
+        // Todo: add legal moves to options
+        return options;
     }
 
     /**
