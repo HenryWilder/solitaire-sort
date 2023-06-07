@@ -446,18 +446,19 @@ class Game {
 
 /**
  * A performable move in the game.
- * Call as a function to execute the move.
+ * Call {@linkcode GameAction.exec|exec} to perform the move.
  */
 interface GameAction {
+
     /**
      * Value of playing this move.
      */
     score: number;
 
     /**
-     *
+     * Perform the action.
      */
-    exec: () => void;
+    exec: (() => void);
 }
 
 /**
