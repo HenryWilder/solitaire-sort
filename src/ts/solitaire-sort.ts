@@ -320,6 +320,7 @@ class Hand {
 
 /**
  * Storage for gameplay elements.
+ * @todo
  */
 class Game {
 
@@ -359,25 +360,31 @@ class Game {
      */
     public field: FieldStack[];
 
+    // Todo: Add any helpers needed
 }
 
 /**
  * Plays a game of solitaire.
  * @param data The input cards.
  * @returns The sorted list.
+ * @todo
  */
 const Play = (data: Card[]): Card[] => {
     const game = new Game(data);
+
+    // Todo: Play the game
+
     return game.foundation.flatMap(stack => stack.all);
 }
 
 /**
  * Sorts the data by playing a game of faux-solitaire.
  * @param data The list of cards to be sorted.
+ * @todo
  */
 export const solitaireSort = (data: Card[]): Card[] => {
     for (let i = 0; i < 3; ++i) {
-        Play(data);
+        Play(data); // Todo: Get information back from this
     }
     return data;
 }
