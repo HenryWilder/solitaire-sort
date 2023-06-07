@@ -532,14 +532,13 @@ class Gamer {
 
         // ! Currently not a valid move, just using this for testing
         if (this.game.hand.numCards !== 0) {
-            const opt: GameAction = {
+            options.push({
                 score: 1,
                 exec: () => {
                     // Transfers top card from hand into first column of the field
                     this.game.field[0].pushToTop(this.game.hand.pull());
                 }
-            }
-            options.push(opt);
+            });
         }
         return options;
     }
