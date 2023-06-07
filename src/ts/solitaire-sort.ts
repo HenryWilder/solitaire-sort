@@ -17,9 +17,21 @@ import { rules } from "./solitaire-sort-rules";
  *
  * ---
  *
- * Currently implemented as a string--intended to be treated as a C/C++ `char`.
+ * Currently implemented as a string of
+ * ```
+ * /^(A|[2-9]|0|J|Q|K)$/
+ * ```
+ * (uses 0 instead of 10)
  */
-type Card = string;
+type Card = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '0' | 'J' | 'Q' | 'K';
+
+/**
+ * Compares two instances of `Card` to see what order they should be in.
+ */
+const compareCard = (a: Card, b: Card): number => {
+    const numify = (x: Card) => "A234567890JQK".indexOf(x);
+    return numify(a) - numify(b);
+};
 
 /**
  * A stack of cards on the field.
@@ -504,7 +516,17 @@ class Gamer {
             this.game.hand.topCard;
         }
 
-        // Todo: add legal moves to options
+        // ! Currently not a valid move, just using this for testing
+        if (this.game.hand.numCards !== 0) {
+            const opt: GameAction = {
+                score: 1,
+                exec: () => {
+                    // Transfers top card from hand into first column of the field
+                    this.game.field[0].pushToTop(this.game.hand.pull());
+                }
+            }
+            options.push(opt);
+        }
         return options;
     }
 
@@ -522,7 +544,14 @@ class Gamer {
             return GameStatus.Loss;
         }
 
+        console.group("move options")
+        for (const opt of options) {
+            console.log(opt.exec.toString());
+        }
+        console.groupEnd();
+
         const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
+        console.log(`Selected move: ${highestScoredOption.exec.toString()}`);
         highestScoredOption.exec();
 
         return GameStatus.Playing;
@@ -558,11 +587,12 @@ const play = (data: Card[]): Card[] | null => {
 /**
  * Sorts the data by playing a game of faux-solitaire.
  * @param data The list of cards to be sorted.
+ * @todo Pass in rules as object instead of using constants
  */
 export const solitaireSort = (data: Card[]): Card[] => {
     const maxTries: number = 3;
     for (let i = 0; i < maxTries; ++i) {
-        const sorted: Card[] | null = play(data.map(e => e));
+        const sorted: Card[] | null = play(data.slice());
         if (sorted !== null) {
             return sorted;
         }
