@@ -368,7 +368,7 @@ class Game {
  */
 const Play = (data: Card[]): Card[] => {
     const game = new Game(data);
-    return game.foundation.flatMap(stack => stack.);
+    return game.foundation.flatMap(stack => stack.all);
 }
 
 /**
@@ -379,4 +379,5 @@ export const solitaireSort = (data: Card[]): Card[] => {
     for (let i = 0; i < 3; ++i) {
         Play(data);
     }
+    return data;
 }
