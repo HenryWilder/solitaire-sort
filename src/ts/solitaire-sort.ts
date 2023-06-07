@@ -442,7 +442,35 @@ class Game {
  * @todo
  */
 class Gamer {
+    public constructor() { }
 
+    /**
+     * Makes a move in the game. Uses random access rules.
+     * @param game The game to make a move in. **Will have contents modified.**
+     */
+    private makeMove_randomAccess(game: Game): void {
+
+    }
+
+    /**
+     * Makes a move in the game. Uses top access rules.
+     * @param game The game to make a move in. **Will have contents modified.**
+     */
+    private makeMove_topAccess(game: Game): void {
+
+    }
+
+    /**
+     * Makes a move in the game. **Modifies game.**
+     * @param game The game to make a move in. **Will have contents modified.**
+     */
+    public makeMove(game: Game): void {
+        if (Hand.isRandomAccess) {
+            this.makeMove_randomAccess(game);
+        } else {
+            this.makeMove_topAccess(game);
+        }
+    }
 }
 
 /**
@@ -456,6 +484,8 @@ const play = (data: Card[]): Card[] | null => {
     game.setup();
     game.visualize();
     const gamer: Gamer = new Gamer();
+
+    gamer.makeMove(game);
 
     // Todo: Play the game
 
