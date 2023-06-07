@@ -442,7 +442,13 @@ class Game {
  * @todo
  */
 class Gamer {
-    public constructor() { }
+    public constructor() {
+        if (Hand.isRandomAccess) {
+            this.makeMove = this.makeMove_randomAccess;
+        } else {
+            this.makeMove = this.makeMove_topAccess;
+        }
+    }
 
     /**
      * Makes a move in the game. Uses random access rules.
@@ -465,11 +471,7 @@ class Gamer {
      * @param game The game to make a move in. **Will have contents modified.**
      */
     public makeMove(game: Game): void {
-        if (Hand.isRandomAccess) {
-            this.makeMove_randomAccess(game);
-        } else {
-            this.makeMove_topAccess(game);
-        }
+        throw new Error("Using uninitialized makeMove method");
     }
 }
 
