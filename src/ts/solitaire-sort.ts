@@ -447,7 +447,6 @@ class Game {
 const play = (data: Card[]): Card[] => {
     const game = new Game(data);
     game.setup();
-
     game.visualize();
 
     // Todo: Play the game
@@ -462,7 +461,7 @@ const play = (data: Card[]): Card[] => {
  */
 export const solitaireSort = (data: Card[]): Card[] => {
     for (let i = 0; i < 3; ++i) {
-        play(data); // Todo: Get information back from this
+        play(data.map(e => e)); // Todo: Get information back from this
     }
     return data;
 }
