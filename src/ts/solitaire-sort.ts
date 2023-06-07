@@ -442,12 +442,13 @@ class Game {
  * Call as a function to execute the move.
  * @param game The game to make a move in. **Will have its contents modified.**
  */
-type GameAction = (game: Game) => void;
+type GameAction = () => void;
 
 /**
  * AI player. Selects strategy based on rules.
  */
 class Gamer {
+
     public constructor(
         /**
          * Personal reference to the game so we don't have to constantly pass it around.
@@ -497,7 +498,7 @@ class Gamer {
         }
 
         // todo: select a more favorable move
-        options[0](this.game);
+        options[0]();
 
         return true;
     }
