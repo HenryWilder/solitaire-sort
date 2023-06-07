@@ -44,8 +44,17 @@ export const isCard = (x: any): x is Card => {
  */
 const compareCard = (a: Card, b: Card): number => {
     const numify = (x: Card) => "A234567890JQK".indexOf(x);
-    return numify(a) - numify(b);
+    return numify(b) - numify(a);
 };
+
+/**
+ * Whether the given cards can be stacked.
+ * @param a The card below.
+ * @param b The card above.
+ */
+const stackable = (a: Card, b: Card): boolean => {
+    return compareCard(a, b) === 1;
+}
 
 /**
  * A stack of cards on the field.
@@ -88,6 +97,44 @@ class FieldStack {
      */
     public get faceUpCards(): Card[] {
         return this.cards.slice(-this.faceUp);
+    }
+
+    /**
+     * The number of moveable cards in the stack.
+     * Cards are moveable if they consecutively increment.
+     */
+    public get moveable(): number {
+        for (let i = 1; i < this.faceUp; ++i) {
+            if (compareCard(this.cards[this.numCards - (i - 1)], this.cards[this.numCards - i]) !== 1) {
+                return i;
+            }
+        }
+        return this.faceUp;
+    }
+
+
+    /**
+     * A readable copy of the moveable cards from the top of the stack.
+     */
+    public get moveableCards(): Card[] {
+        return this.cards.slice(-this.moveable);
+    }
+
+    /**
+     * A readable copy of the topmost card of the stack.
+     * @returns
+     * - The card at the top (back/end) of the stack.
+     * - `null` if that card is face down.
+     * - `undefined` if there are no cards.
+     */
+    public get topCard(): Card | null | undefined {
+        if (this.numCards === 0) {
+            return;
+        } else if (this.faceUp === 0) {
+            return null;
+        } else {
+            return this.cards[this.numCards - 1];
+        }
     }
 
     /**
@@ -530,10 +577,35 @@ class Gamer {
             this.game.hand.topCard;
         }
 
-        // ! Currently not a valid move, just using this for testing
+        for (const src of this.game.field) {
+            const moveableCards = src.moveableCards;
+            const moveable = moveableCards.length;
+            for (const dest of this.game.field) {
+                if (src === dest) {
+                    continue;
+                }
+                const destTop = dest.topCard;
+                if (!destTop) {
+                    continue;
+                }
+                for (let num = 0; num < moveable; ++num) {
+                    if (stackable(destTop, moveableCards[num])) {
+                        options.push({
+                            score: 1,
+                            exec: () => {
+                                dest.pushToTop(src.pullFromTop(num + 1));
+                            }
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Debug
         if (this.game.hand.numCards !== 0) {
             options.push({
-                score: 1,
+                score: 999,
                 exec: () => {
                     // Transfers top card from hand into first column of the field
                     this.game.field[0].pushToTop(this.game.hand.pull());
@@ -579,13 +651,17 @@ class Gamer {
 const play = (data: Card[]): Card[] | null => {
     const game: Game = new Game(data);
     game.setup();
-    game.visualize();
     const gamer: Gamer = new Gamer(game);
 
     while (true) {
+
+        // Display the game state before each move
+        game.visualize();
+
         switch (gamer.tryMakeMove()) {
 
             case GameStatus.Loss:
+                console.log("Lost");
                 return null;
 
             case GameStatus.Playing:
@@ -603,12 +679,12 @@ const play = (data: Card[]): Card[] | null => {
  * @todo Pass in rules as object instead of using constants
  */
 export const solitaireSort = (data: Card[]): Card[] => {
-    const maxTries: number = 3;
-    for (let i = 0; i < maxTries; ++i) {
-        const sorted: Card[] | null = play(data.slice());
-        if (sorted !== null) {
-            return sorted;
-        }
-    }
-    throw new Error(`Lost ${maxTries} times. Not retrying.`);
+    // const maxTries: number = 3;
+    // for (let i = 0; i < maxTries; ++i) {
+    const sorted: Card[] | null = play(data.slice());
+    // if (sorted !== null) {
+    return sorted || data;
+    // }
+    // }
+    // throw new Error(`Lost ${maxTries} times. Not retrying.`);
 }
