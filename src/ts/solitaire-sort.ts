@@ -58,7 +58,7 @@ class FieldStack {
     }
 
     /**
-     * Gives a readable list of all `faceUp` cards from the top of the stack.
+     * A readable copy of the `faceUp` cards from the top of the stack.
      */
     public get faceUpCards(): Card[] {
         return this.cards.slice(-this.faceUp);
@@ -149,7 +149,7 @@ class FoundationStack {
     /**
      * A readable copy of the visible card on top of the stack.
      */
-    public get top(): Card {
+    public get topCard(): Card {
         console.assert(this.numCards !== 0);
         return this.cards[this.numCards - 1];
     }
@@ -157,8 +157,8 @@ class FoundationStack {
     /**
      * A readable copy of the stack's cards.
      */
-    public get all(): Card[] {
-        return this.cards;
+    public get allCards(): Card[] {
+        return this.cards.map(e => e);
     }
 
     /**
@@ -166,8 +166,8 @@ class FoundationStack {
      * @param cards The cards to push to the stack. **Must be in order**.\
      * Because it is likely the cards will have already been removed from their source,
      * returning `false` is insufficient. If the cards being added are `<` the
-     * {@linkcode FoundationStack.top|top}, **an exception will be thrown.**
-     * @throws "Out of order" error - `cards` is not increasing in value or is of lesser value than {@linkcode FoundationStack.top|top}.
+     * {@linkcode FoundationStack.topCard|top}, **an exception will be thrown.**
+     * @throws "Out of order" error - `cards` is not increasing in value or is of lesser value than {@linkcode FoundationStack.topCard|top}.
      *
      */
     public pushToTop(cards: Card | Card[]): void {
@@ -260,10 +260,17 @@ class Hand {
     }
 
     /**
-     * A readable list of the cards in the hand.
+     * A readable copy of the cards in the hand.
      */
     public get cardsInHand(): Card[] {
-        return this.cards;
+        return this.cards.slice();
+    }
+
+    /**
+     * A readable copy of the card at the back of the list.
+     */
+    public get topCard(): Card {
+        return this.cards[this.numCards - 1];
     }
 
     /**
@@ -426,7 +433,7 @@ class Game {
         console.group("foundation");
         for (let i = 0; i < this.foundation.length; ++i) {
             if (this.foundation[i].numCards > 0) {
-                console.log(`${i}: ${this.foundation[i].numCards} cards: top: [${this.foundation[i].top}]`);
+                console.log(`${i}: ${this.foundation[i].numCards} cards: top: [${this.foundation[i].topCard}]`);
             } else {
                 console.log(`${i}: empty`);
             }
@@ -440,7 +447,6 @@ class Game {
 /**
  * A performable move in the game.
  * Call as a function to execute the move.
- * @param game The game to make a move in. **Will have its contents modified.**
  */
 type GameAction = (() => void);
 
@@ -454,38 +460,23 @@ class Gamer {
          * Personal reference to the game so we don't have to constantly pass it around.
          */
         private game: Game,
-    ) {
-        this.getMoveOptions = Hand.isRandomAccess
-            ? this._getMoveOptions_randomAccess
-            : this._getMoveOptions_topAccess;
-    }
-
-    /**
-     * Returns a list of the possible moves in the gamestate.
-     * If the result is an empty array, no moves are possible and the game should end.
-     */
-    private _getMoveOptions_randomAccess(): GameAction[] {
-        const options: GameAction[] = [];
-        // Todo: add legal moves to options
-        return options;
-    }
-
-    /**
-     * Returns a list of the possible moves in the gamestate.
-     * If the result is an empty array, no moves are possible and the game should end.
-     */
-    private _getMoveOptions_topAccess(): GameAction[] {
-        const options: GameAction[] = [];
-        // Todo: add legal moves to options
-        return options;
-    }
+    ) { }
 
     /**
      * Returns a list of the possible moves in the gamestate.
      * If the result is an empty array, no moves are possible and the game should end.
      */
     private getMoveOptions(): GameAction[] {
-        throw new Error("Using uninitialized getMoveOptions method");
+        const options: GameAction[] = [];
+
+        if (Hand.isRandomAccess) {
+            this.game.hand.cardsInHand;
+        } else {
+            this.game.hand.topCard;
+        }
+
+        // Todo: add legal moves to options
+        return options;
     }
 
     /**
@@ -525,7 +516,7 @@ const play = (data: Card[]): Card[] | null => {
 
     // Todo: return null on loss
 
-    return game.foundation.flatMap(stack => stack.all);
+    return game.foundation.flatMap(stack => stack.allCards);
 }
 
 /**
