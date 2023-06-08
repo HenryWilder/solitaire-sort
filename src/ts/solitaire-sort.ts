@@ -105,7 +105,7 @@ class FieldStack {
      */
     public get moveable(): number {
         for (let i = 1; i < this.faceUp; ++i) {
-            if (compareCard(this.cards[this.numCards - (i - 1)], this.cards[this.numCards - i]) !== 1) {
+            if (!stackable(this.cards[this.numCards - (i - 1)], this.cards[this.numCards - i])) {
                 return i;
             }
         }
