@@ -27,7 +27,7 @@ def cleanLambda(lambdaString: str) -> str:
     return re.sub(pattern=rx, repl='', string=lambdaString, flags=re._FlagsType.MULTILINE)
 
 
-Card = Union['A', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'J', 'Q', 'K']
+Card = Union('A', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'J', 'Q', 'K')
 """An abstraction for a unit of data used in the algorithm.
 
 ---
