@@ -475,13 +475,13 @@ class Hand:
 """
  * Storage for gameplay elements.
 """
-class Game {
+class Game:
 
-    def __init__(deck: list[Card]) {
-        this.deck = new Deck(deck);
-        this.hand = new Hand();
-        this.foundation = [new FoundationStack()];
-        this.field = [
+    def __init__(self, deck: list[Card]):
+        self.deck = new Deck(deck);
+        self.hand = new Hand();
+        self.foundation = [new FoundationStack()];
+        self.field = [
             new FieldStack(),
             new FieldStack(),
             new FieldStack(),
@@ -490,92 +490,92 @@ class Game {
             new FieldStack(),
             new FieldStack(),
             new FieldStack(),
-        ];
-    }
+        ]
 
-    """
-     * The source of cards.
-    """
-    public deck: Deck;
 
+    deck: Deck
+    """The source of cards.
     """
-     * The "working memory" of the deck.
-    """
-    public hand: Hand;
 
+    hand: Hand
+    """The "working memory" of the deck.
     """
-     * The destination of sorted stacks.
-    """
-    public foundation: FoundationStack[];
 
+    foundation: list[FoundationStack]
+    """The destination of sorted stacks.
     """
-     * The destination
-    """
-    public field: FieldStack[];
 
+    field: list[FieldStack]
+    """The destination
     """
-     * Deals out cards to the field.
-     * Each stack in the field gets one more card than the previous, and the first gets 1.
-    """
-    private dealToField() -> None:
-        for (let i: int = 0; i < len(self.field); ++i) {
-            self.field[i].pushToTop(self.deck.pullFromTop(i + 1));
-        }
-    }
 
-    """
-     * Sets up the game.
-     * 1. Shuffles the deck
-     * 2. Deals cards to the field
-     * 3. Deals cards to hand
-    """
-    public setup() -> None:
-        self.deck.shuffle();
-        self.dealToField();
-        self.hand.draw(self.deck);
-    }
+    def _deal_to_field(self) -> None:
+        """Deals out cards to the field.
+        Each stack in the field gets one more card than the previous, and the first gets 1.
+        """
+        for i in range(len(self.field)):
+            self.field[i].pushToTop(self.deck.pullFromTop(i + 1))
 
-    """
-     * Prints a snapshot of the game to the console.
-    """
-    public visualize() -> None:
-        console.group("snapshot");
 
-        if (this.deck.numCards > 0) {
-            console.log(`deck: ${this.deck.numCards} cards`);
-        } else {
-            console.log(`deck: empty`);
-        }
+    def setup(self) -> None:
+        """Sets up the game.
+        1. Shuffles the deck
+        2. Deals cards to the field
+        3. Deals cards to hand
+        """
+        self.deck.shuffle()
+        self.dealToField()
+        self.hand.draw(self.deck)
 
-        if (this.hand.numCards > 0) {
-            console.log(`hand: ${this.hand.numCards} (out of ${Hand.maxCards} max) cards: [[${this.hand.cardsInHand.join('][')}]]`);
-        } else {
-            console.log(`hand: empty (${Hand.maxCards} max)`);
-        }
 
-        console.group("field");
-        for (let i = 0; i < len(this.field); ++i) {
-            if (this.field[i].numCards > 0) {
-                console.log(`${i}: ${this.field[i].numCards} cards: [${'[?]'.repeat(this.field[i].faceDown)}[${this.field[i].faceUpCards.join('][')}]]`);
+    def visualize(self) -> None:
+        """Prints a snapshot of the game to the console.
+        """
+        indent = 0
+
+        def group(str):
+            print(str)
+            indent += 1
+
+        def groupEnd():
+            assert indent > 0
+            indent -= 1
+
+        group("snapshot")
+
+        if self.deck.num_cards > 0:
+            print('  '*indent+`deck: ${this.deck.numCards} cards`);
+        else:
+            print('  '*indent+`deck: empty`);
+
+
+        if self.hand.num_cards > 0:
+            print('  '*indent+f'hand: {self.hand.num_cards} (out of {Hand.max_cards} max) cards: [[{self.hand.cards_in_hand.join('][')}]]')
+        else:
+            print('  '*indent+f'hand: empty ({Hand.max_cards} max)')
+
+
+        group("field");
+        for (let i = 0; i < len(self.field); ++i) {
+            if (self.field[i].numCards > 0) {
+                print('  '*indent+f'{i}: {self.field[i].num_cards} cards: [{'[?]'.repeat(self.field[i].faceDown)}[{self.field[i].faceUpCards.join('][')}]]');
             } else {
-                console.log(`${i}: empty`);
+                print('  '*indent+f'{i}: empty');
             }
         }
-        console.groupEnd();
+        groupEnd();
 
-        console.group("foundation");
-        for (let i = 0; i < len(this.foundation); ++i) {
-            if (this.foundation[i].numCards > 0) {
-                console.log(`${i}: ${this.foundation[i].numCards} cards: top: [${this.foundation[i].topCard}]`);
-            } else {
-                console.log(`${i}: empty`);
-            }
-        }
-        console.groupEnd();
+        group("foundation");
+        for i in range(len(self.foundation)):
+            if self.foundation[i].num_cards > 0:
+                print('  '*indent+f'{i}: {self.foundation[i].numCards} cards: top: [{self.foundation[i].topCard}]');
+            else:
+                print('  '*indent+f'{i}: empty');
 
-        console.groupEnd();
-    }
-}
+        groupEnd();
+
+        groupEnd();
+
 
 """
  * A performable move in the game.
@@ -696,10 +696,10 @@ class Gamer {
 
         console.group("move options")
         for (const opt of options) {
-            console.log(cleanLambda(opt.exec.toString()));
+            print(cleanLambda(opt.exec.toString()));
         }
         console.groupEnd();
-        console.log(`Selected move: ${cleanLambda(highestScoredOption.exec.toString())}`);
+        print(`Selected move: ${cleanLambda(highestScoredOption.exec.toString())}`);
 
         highestScoredOption.exec();
 
