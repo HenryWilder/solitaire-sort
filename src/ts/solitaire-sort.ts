@@ -231,7 +231,7 @@ class FoundationStack {
      * A readable copy of the stack's cards.
      */
     public get allCards(): Card[] {
-        return this.cards.map(e => e);
+        return this.cards.slice();
     }
 
     /**
