@@ -11,7 +11,7 @@ remark: This project is explicitly a joke and not meant for production.
 
 
 import re
-from typing import Literal, Callable
+from typing import Literal, Callable, TypeAlias
 from warnings import warn
 import traceback
 import math
@@ -19,36 +19,35 @@ import random
 import solitaireSortRules as rules
 
 
-def cleanLambda(lambdaString: str) -> str:
-    """A helper for removing the leading indent of a lambda function.
-    """
-    lastLineIndex = lambdaString.rfind('\n')
-    if lastLineIndex == -1:
-        return lambdaString
-    lastLine: str = lambdaString[lastLineIndex:]
-    spacesInLastLine: int = lastLine.find('}') - 1
-    rx = f'^\\s{{{spacesInLastLine}}}'
-    return re.sub(pattern=rx, repl='', string=lambdaString, flags=re._FlagsType.MULTILINE)
+def clean_lambda(lambda_string: str) -> str:
+    """A helper for removing the leading indent of a lambda function."""
+    last_line_index = lambda_string.rfind('\n')
+    if last_line_index == -1:
+        return lambda_string
+    last_line: str = lambda_string[last_line_index:]
+    spaces_in_last_line: int = last_line.find('}') - 1
+    rx = f'^\\s{{{spaces_in_last_line}}}'
+    return re.sub(pattern=rx, repl='', string=lambda_string, flags=re._FlagsType.MULTILINE)
 
 
-Card = str
+Card: TypeAlias[str] = str
 """An abstraction for a unit of data used in the algorithm.
 
 ---
 
 Currently implemented as a string of
-```
+```js
 /^[A2-90JQK]$/
 ```
 (uses 0 instead of 10)
 """
 
 
-def isCard(x) -> bool:
+def is_card(x) -> bool:
     return re.match(r'^[A2-90JQK]$', x) is not None
 
 
-def compareCard(a: Card, b: Card) -> int:
+def compare_card(a: Card, b: Card) -> int:
     """Compares two instances of `Card` to see what order they should be in.
 
     Returns:
@@ -69,7 +68,7 @@ def stackable(a: Card, b: Card) -> bool:
     Returns:
         bool: Whether `b` is exactly 1 more than `a`
     """
-    return compareCard(a, b) == 1
+    return compare_card(a, b) == 1
 
 
 class FieldStack:
@@ -85,47 +84,39 @@ class FieldStack:
         The back (last element) is called the top, while the front (first element) is called the bottom.
         """
         self.face_up: int = face_up
-        """The number of cards considered public, counts starting from the top (the back/last element)
-        """
+        """The number of cards considered public, counts starting from the top (the back/last element)"""
         assert(self.face_up <= self.num_cards)
 
 
     def get_num_cards(self) -> int:
-        """Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
-        """
+        """Tells how many **total** cards are in the stack - both `face_up` and `face_down`."""
         return len(self._cards)
 
 
     num_cards = property(get_num_cards)
-    """Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
-    """
+    """Tells how many **total** cards are in the stack - both `face_up` and `face_down`."""
 
 
     def get_face_down(self) -> int:
-        """Tells how many `faceDown` cards are in the stack - only cards that are not `faceUp`.
-        """
+        """Tells how many `face_down` cards are in the stack - only cards that are not `face_up`."""
         return self.num_cards() - self.face_up
 
 
     face_down = property(get_face_down)
-    """Tells how many `faceDown` cards are in the stack - only cards that are not `faceUp`.
-    """
+    """Tells how many `face_down` cards are in the stack - only cards that are not `face_up`."""
 
 
     def get_face_up_cards(self) -> list[Card]:
-        """A readable copy of the `faceUp` cards from the top of the stack.
-        """
+        """A readable copy of the `face_up` cards from the top of the stack."""
         return self._cards[-self.face_up:]
 
 
     face_up_cards = property(get_face_up_cards)
-    """A readable copy of the `faceUp` cards from the top of the stack.
-    """
+    """A readable copy of the `face_up` cards from the top of the stack."""
 
 
     def get_moveable(self) -> int:
-        """The number of moveable cards in the stack. Cards are moveable if they consecutively increment.
-        """
+        """The number of moveable cards in the stack. Cards are moveable if they consecutively increment."""
         for i in range(1, self.face_up):
             card_prev: Card = self._cards[self.get_num_cards() - (i - 1)]
             card_curr: Card = self._cards[self.get_num_cards() - i]
@@ -136,8 +127,7 @@ class FieldStack:
 
 
     moveable = property(get_moveable)
-    """The number of moveable cards in the stack. Cards are moveable if they consecutively increment.
-    """
+    """The number of moveable cards in the stack. Cards are moveable if they consecutively increment."""
 
 
     def get_moveable_cards(self) -> list[Card]:
@@ -147,8 +137,7 @@ class FieldStack:
 
 
     moveable_cards = property(get_moveable_cards)
-    """A readable copy of the moveable cards from the top of the stack.
-    """
+    """A readable copy of the moveable cards from the top of the stack."""
 
 
     def get_top_card(self) -> Card | Literal[False] | None:
@@ -178,9 +167,9 @@ class FieldStack:
 
 
     def push_to_top(self, cards: Card | list[Card]) -> None:
-        """Places `cards` on top of the stack. The new cards will be `faceUp`.
+        """Places `cards` on top of the stack. The new cards will be `face_up`.
 
-        Existing `faceUp` cards on top of the stack will *remain* `faceUp`.
+        Existing `face_up` cards on top of the stack will *remain* `face_up`.
         """
 
         if cards is list:
@@ -219,15 +208,13 @@ class FieldStack:
 
 
     def reveal(self, n: int) -> None:
-        """Makes `n`-more cards `faceUp`.
-        """
+        """Makes `n`-more cards `face_up`."""
         assert n <= self.face_down
         self.face_up += n
 
 
     def conceal(self, n: int) -> None:
-        """Makes `n`-fewer cards `faceUp`.
-        """
+        """Makes `n`-fewer cards `face_up`."""
         assert n <= self.face_up
         self.face_up -= n
 
@@ -238,9 +225,11 @@ class FoundationStack:
 
     ---
 
-    Hey wait a sec, how is this algorithm supposed to sort sparse arrays without knowing the correct order ahead of time?
+    Notes:
 
-    Won't this run into the issue of being able to soft lock by placing, for example, a 10 on top of a 3, despite there being an 5 in the field?
+        Hey wait a sec, how is this algorithm supposed to sort sparse arrays without knowing the correct order ahead of time?
+
+        Won't this run into the issue of being able to soft lock by placing, for example, a 10 on top of a 3, despite there being an 5 in the field?
 
     ---
 
@@ -255,37 +244,31 @@ class FoundationStack:
         """
 
     def get_num_cards(self) -> int:
-        """Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
-        """
+        """Tells how many **total** cards are in the stack - both `face_up` and `face_down`."""
         return len(self._cards)
 
 
     num_cards = property(get_num_cards)
-    """Tells how many **total** cards are in the stack - both `faceUp` and `faceDown`.
-    """
+    """Tells how many **total** cards are in the stack - both `face_up` and `face_down`."""
 
 
     def get_top_card(self) -> Card:
-        """A readable copy of the visible card on top of the stack.
-        """
+        """A readable copy of the visible card on top of the stack."""
         assert self.num_cards != 0
         return self._cards[self.num_cards - 1]
 
 
     top_card = property(get_top_card)
-    """A readable copy of the visible card on top of the stack.
-    """
+    """A readable copy of the visible card on top of the stack."""
 
 
     def get_all_cards(self) -> list[Card]:
-        """A readable copy of the stack's cards.
-        """
+        """A readable copy of the stack's cards."""
         return self._cards.copy()
 
 
     all_cards = property(get_all_cards)
-    """A readable copy of the stack's cards.
-    """
+    """A readable copy of the stack's cards."""
 
 
     def push_to_top(self, cards: Card | list[Card]) -> None:
@@ -298,7 +281,7 @@ class FoundationStack:
             `top_card`, **an exception will be thrown.**
 
         Exceptions:
-            "Out of order" error: `cards` is not increasing in value or is of lesser value than {@linkcode FoundationStack.topCard|top}.
+            "Out of order" error: `cards` is not increasing in value or is of lesser value than top_card.
         """
         if cards is list:
             if len(cards) == 0:
@@ -325,17 +308,15 @@ class Deck:
         """
 
     def get_num_cards(self) -> int:
-        """The total number of cards in the deck.
-        """
+        """The total number of cards in the deck."""
         return len(self._cards)
 
 
     num_cards = property(get_num_cards)
-    """The total number of cards in the deck.
-    """
+    """The total number of cards in the deck."""
 
 
-    def pushToBottom(self, cards: list[Card]) -> None:
+    def push_to_bottom(self, cards: list[Card]) -> None:
         """Slides `cards` underneath the stack.
 
         Parameters:
@@ -345,7 +326,7 @@ class Deck:
         self._cards = cards
 
 
-    def pullFromTop(self, n: int) -> list[Card]:
+    def pull_from_top(self, n: int) -> list[Card]:
         """## Only {@linkcode Hand} is intended use this.
         And Game, during setup.
         ### It's not like anything is gonna break, it's just the rules of the game.
@@ -361,9 +342,7 @@ class Deck:
 
 
     def shuffle(self) -> None:
-        """
-        * Randomizes the order of the elements.
-        """
+        """Randomizes the order of the elements."""
         for i in reversed(range(self.num_cards)):
             j = random.randint(0, i)
             self._cards[i], self._cards[j] = (self._cards[j], self._cards[i]) # Swaps elements i and j
@@ -388,71 +367,69 @@ class Hand:
         assert len(cards) <= rules.HAND_SIZE_MAX
 
     def get_cards_in_hand(self) -> list[Card]:
-        """A readable copy of the cards in the hand.
-        """
+        """A readable copy of the cards in the hand."""
         return self._cards[:]
 
     cards_in_hand = property(get_cards_in_hand)
-    """A readable copy of the cards in the hand.
-    """
+    """A readable copy of the cards in the hand."""
 
     def get_top_card(self) -> Card:
-        """A readable copy of the card at the back of the list.
-        """
+        """A readable copy of the card at the back of the list."""
         return self._cards[self.get_num_cards - 1]
 
 
     @staticmethod
     def get_is_random_access() -> bool:
         """Tells whether the Hand is allowed random access for cards.
+
         See:
             HAND_ALLOW_RANDOM_ACCESS
-            pullAt
+            pull_at
         """
         return rules.HAND_ALLOW_RANDOM_ACCESS
     
 
     is_random_access = property(get_is_random_access)
     """Tells whether the Hand is allowed random access for cards.
+
     See:
         HAND_ALLOW_RANDOM_ACCESS
-        pullAt
+        pull_at
     """
 
 
     @staticmethod
     def get_max_cards() -> int:
         """The maximum capacity of the Hand.
-        @see HAND_SIZE_MAX
+
+        See:
+            HAND_SIZE_MAX
         """
         return rules.HAND_SIZE_MAX
     
 
     max_cards = property(get_max_cards)
     """The maximum capacity of the Hand.
-    @see HAND_SIZE_MAX
+    
+    See:
+        HAND_SIZE_MAX
     """
 
 
     def get_num_cards(self) -> int:
-        """The number of cards currently in the hand.
-        [0..HAND_SIZE_MAX)
-        """
+        """The number of cards currently in the hand. [0..HAND_SIZE_MAX)"""
         return len(self._cards)
 
 
     num_cards = property(get_num_cards)
-    """The number of cards currently in the hand.
-    [0..HAND_SIZE_MAX)
-    """
+    """The number of cards currently in the hand. [0..HAND_SIZE_MAX)"""
 
 
-    def pullAt(self, index: int) -> Card | Literal[False]:
-        """
-        * Removes and returns the card at the provided index.
-        * Do not use if `cards` is empty.
-        * @returns `Literal[False]` if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is false.
-        * @param index The zero-based index of the card to pull.
+    def pull_at(self, index: int) -> Card | Literal[False]:
+        """Removes and returns the card at the provided index.
+        Do not use if `cards` is empty.
+        @returns `Literal[False]` if {@linkcode rules.HAND_ALLOW_RANDOM_ACCESS|HAND_ALLOW_RANDOM_ACCESS} is false.
+        @param index The zero-based index of the card to pull.
         """
 
         if not rules.HAND_ALLOW_RANDOM_ACCESS:
@@ -466,31 +443,29 @@ class Hand:
         return self._cards.pop(index)
 
 
-    """
-     * Removes and returns the card at the top.
-     * @returns The card at the top.
-    """
     def pull(self) -> Card:
+        """Removes and returns the card at the top.
+
+        Returns:
+            The card at the top.
+        """
         assert self.get_num_cards > 0
         return self._cards.pop()
 
 
-    """
-     * Draws a new set of cards from the deck.
-     * Passes the full contents of the hand to the bottom of the deck, then pulls
-     * {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX} cards from the top of the deck to insert back into the hand.
-     * If the deck has fewer than {@linkcode rules.HAND_SIZE_MAX|HAND_SIZE_MAX} cards,
-     * the entire remaining deck will be emptied into the hand.
+    """Draws a new set of cards from the deck.
+    Passes the full contents of the hand to the bottom of the deck, then pulls
+    HAND_SIZE_MAX cards from the top of the deck to insert back into the hand.
+    If the deck has fewer than HAND_SIZE_MAX cards,
+    the entire remaining deck will be emptied into the hand.
     """
     def draw(self, deck: Deck) -> None:
-        deck.pushToBottom(self._cards)
-        self._cards = deck.pullFromTop(min(rules.HAND_SIZE_MAX, deck.num_cards))
+        deck.push_to_bottom(self._cards)
+        self._cards = deck.pull_from_top(min(rules.HAND_SIZE_MAX, deck.num_cards))
 
 
-"""
- * Storage for gameplay elements.
-"""
 class Game:
+    """Storage for gameplay elements."""
 
     def __init__(self, deck: list[Card]):
         self.deck = Deck(deck)
@@ -509,27 +484,23 @@ class Game:
 
 
     deck: Deck
-    """The source of cards.
-    """
+    """The source of cards."""
 
     hand: Hand
-    """The "working memory" of the deck.
-    """
+    """The "working memory" of the deck."""
 
     foundation: list[FoundationStack]
-    """The destination of sorted stacks.
-    """
+    """The destination of sorted stacks."""
 
     field: list[FieldStack]
-    """The destination
-    """
+    """The destination"""
 
     def _deal_to_field(self) -> None:
         """Deals out cards to the field.
         Each stack in the field gets one more card than the previous, and the first gets 1.
         """
         for i in range(len(self.field)):
-            self.field[i].push_to_top(self.deck.pullFromTop(i + 1))
+            self.field[i].push_to_top(self.deck.pull_from_top(i + 1))
 
 
     def setup(self) -> None:
@@ -544,15 +515,14 @@ class Game:
 
 
     def visualize(self) -> None:
-        """Prints a snapshot of the game to the console.
-        """
+        """Prints a snapshot of the game to the console."""
         indent = 0
 
         def group(str):
             print(str)
             indent += 1
 
-        def groupEnd():
+        def group_end():
             assert indent > 0
             indent -= 1
 
@@ -565,31 +535,31 @@ class Game:
 
 
         if self.hand.num_cards > 0:
-            print('  '*indent+f'hand: {self.hand.num_cards} (out of {Hand.max_cards} max) cards: [[{self.hand.cards_in_hand.join("][")}]]')
+            print('  '*indent+f'hand: {self.hand.num_cards} (out of {Hand.max_cards} max) cards: [[{"][".join(self.hand.cards_in_hand)}]]')
         else:
             print('  '*indent+f'hand: empty ({Hand.max_cards} max)')
 
 
-        group("field");
+        group("field")
         for i in range(len(self.field)):
             if self.field[i].num_cards > 0:
-                print('  '*indent+f'{i}: {self.field[i].num_cards} cards: [{"[?]".repeat(self.field[i].faceDown)}[{self.field[i].faceUpCards.join("][")}]]')
+                print('  '*indent+f'{i}: {self.field[i].num_cards} cards: [{"[?]"*self.field[i].face_down}[{"][".join(self.field[i].face_up_cards)}]]')
             else:
                 print('  '*indent+f'{i}: empty')
 
 
-        groupEnd()
+        group_end()
 
         group("foundation")
         for i in range(len(self.foundation)):
             if self.foundation[i].num_cards > 0:
-                print('  '*indent+f'{i}: {self.foundation[i].numCards} cards: top: [{self.foundation[i].topCard}]')
+                print('  '*indent+f'{i}: {self.foundation[i].num_cards} cards: top: [{self.foundation[i].top_card}]')
             else:
                 print('  '*indent+f'{i}: empty')
 
-        groupEnd()
+        group_end()
 
-        groupEnd()
+        group_end()
 
 
 class GameAction:
@@ -598,39 +568,31 @@ class GameAction:
     """
 
     score: int
-    """Value of playing this move.
-    """
+    """Value of playing this move."""
 
     exec: Callable[[None], None]
-    """Perform the action.
-    """
+    """Perform the action."""
 
     debug: str
-    """
-    """
+    """"""
 
 
 class GameStatus:
     LOSS = 0,
-    """No moves possible, didn't win.
-    """
+    """No moves possible, didn't win."""
 
     PLAYING = 1,
-    """Moves possible.
-    """
+    """Moves possible."""
 
     WIN = 2,
-    """No moves possible, won.
-    """
+    """No moves possible, won."""
 
 class Gamer:
-    """AI player. Selects strategy based on rules.
-    """
+    """AI player. Selects strategy based on rules."""
 
     def __init__(self, game: Game):
         self._game: Game = game
-        """Personal reference to the game so we don't have to constantly pass it around.
-        """
+        """Personal reference to the game so we don't have to constantly pass it around."""
     
 
     def _get_move_options(self) -> list[GameAction]:
@@ -676,7 +638,9 @@ class Gamer:
 
     def try_make_move(self) -> GameStatus:
         """Selects and performs a move in the game.
-        @returns Success. If false, no moves are possible and game should end.
+
+        Returns:
+            Success. If false, no moves are possible and game should end.
         """
 
         options: list[GameAction] = self._get_move_options()
@@ -691,11 +655,12 @@ class Gamer:
             if opt.score > highest_scored_option.score:
                 highest_scored_option = opt
 
+        # Not sure how to do this in Python
         # print("move options")
         # for opt in options:
-        #     print(cleanLambda(opt.exec)) # Not sure how to do this
+        #     print(clean_lambda(opt.exec))
         
-        # print(f'Selected move: {cleanLambda(highest_scored_option.exec.toString())}') # Nor this
+        # print(f'Selected move: {clean_lambda(highest_scored_option.exec)}')
 
         highest_scored_option.exec()
 
@@ -704,8 +669,12 @@ class Gamer:
 
 def play(data: list[Card]) -> list[Card] | Literal[False]:
     """Plays a game of solitaire.
-    @param data The input cards.
-    @returns The sorted list. Returns `False` if lost.
+
+    Parameters:
+        data: The input cards.
+
+    Returns:
+        The sorted list. Returns `False` if lost.
     """
     game: Game = Game(data)
     game.setup()
@@ -730,11 +699,14 @@ def play(data: list[Card]) -> list[Card] | Literal[False]:
             raise "What?"
 
 
-def solitaireSort(data: list[Card], rules) -> list[Card]:
-    """
-    * Sorts the data by playing a game of faux-solitaire.
-    * @param data The list of cards to be sorted.
-    * @todo Pass in rules as object instead of using constants
+def solitaire_sort(data: list[Card], rules) -> list[Card]:
+    """Sorts the data by playing a game of faux-solitaire.
+
+    Parameters:
+        data: The list of cards to be sorted.
+
+    Todo:
+        Pass in rules as object instead of using constants
     """
     # max_tries: int = 3
     # for i in range(max_tries):
@@ -743,4 +715,4 @@ def solitaireSort(data: list[Card], rules) -> list[Card]:
     return sorted or data
     # 
     # 
-    # throw new Error(`Lost ${maxTries} times. Not retrying.`);
+    # throw new Error(`Lost ${max_tries} times. Not retrying.`);
