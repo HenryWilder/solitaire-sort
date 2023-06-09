@@ -11,11 +11,12 @@ remark: This project is explicitly a joke and not meant for production.
 
 
 import re
-from typing import Literal
+from typing import Literal, Callable
 from warnings import warn
 import traceback
 import math
 import random
+import solitaireSortRules as rules
 
 
 def cleanLambda(lambdaString: str) -> str:
@@ -409,6 +410,14 @@ class Hand:
             pullAt
         """
         return rules.HAND_ALLOW_RANDOM_ACCESS
+    
+
+    is_random_access = property(get_is_random_access)
+    """Tells whether the Hand is allowed random access for cards.
+    See:
+        HAND_ALLOW_RANDOM_ACCESS
+        pullAt
+    """
 
 
     @staticmethod
@@ -417,6 +426,12 @@ class Hand:
         @see HAND_SIZE_MAX
         """
         return rules.HAND_SIZE_MAX
+    
+
+    max_cards = property(get_max_cards)
+    """The maximum capacity of the Hand.
+    @see HAND_SIZE_MAX
+    """
 
 
     def get_num_cards(self) -> int:
@@ -478,18 +493,18 @@ class Hand:
 class Game:
 
     def __init__(self, deck: list[Card]):
-        self.deck = new Deck(deck);
-        self.hand = new Hand();
-        self.foundation = [new FoundationStack()];
+        self.deck = Deck(deck)
+        self.hand = Hand()
+        self.foundation = [FoundationStack()]
         self.field = [
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
-            new FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
+            FieldStack(),
         ]
 
 
@@ -514,7 +529,7 @@ class Game:
         Each stack in the field gets one more card than the previous, and the first gets 1.
         """
         for i in range(len(self.field)):
-            self.field[i].pushToTop(self.deck.pullFromTop(i + 1))
+            self.field[i].push_to_top(self.deck.pullFromTop(i + 1))
 
 
     def setup(self) -> None:
@@ -524,7 +539,7 @@ class Game:
         3. Deals cards to hand
         """
         self.deck.shuffle()
-        self.dealToField()
+        self.deal_to_field()
         self.hand.draw(self.deck)
 
 
@@ -544,7 +559,7 @@ class Game:
         group("snapshot")
 
         if self.deck.num_cards > 0:
-            print('  '*indent+f'deck: {self.deck.numCards} cards')
+            print('  '*indent+f'deck: {self.deck.num_cards} cards')
         else:
             print('  '*indent+'deck: empty')
 
@@ -563,175 +578,155 @@ class Game:
                 print('  '*indent+f'{i}: empty')
 
 
-        groupEnd();
+        groupEnd()
 
-        group("foundation");
+        group("foundation")
         for i in range(len(self.foundation)):
             if self.foundation[i].num_cards > 0:
                 print('  '*indent+f'{i}: {self.foundation[i].numCards} cards: top: [{self.foundation[i].topCard}]')
             else:
                 print('  '*indent+f'{i}: empty')
 
-        groupEnd();
+        groupEnd()
 
-        groupEnd();
+        groupEnd()
 
 
 class GameAction:
-"""
- * A performable move in the game.
- * Call {@linkcode GameAction.exec|exec} to perform the move.
-"""
+    """A performable move in the game.
+    Call exec to perform the move.
+    """
 
+    score: int
+    """Value of playing this move.
     """
-     * Value of playing this move.
-    """
-    score: int;
 
+    exec: Callable[[None], None]
+    """Perform the action.
     """
-     * Perform the action.
-    """
-    exec: (() => void);
 
+    debug: str
     """
-     *
     """
-    debug: string;
-}
 
-enum GameStatus {
 
+class GameStatus:
+    LOSS = 0,
+    """No moves possible, didn't win.
     """
-     * No moves possible, didn't win.
-    """
-    Loss = 0,
 
+    PLAYING = 1,
+    """Moves possible.
     """
-     * Moves possible.
-    """
-    Playing = 1,
 
+    WIN = 2,
+    """No moves possible, won.
     """
-     * No moves possible, won.
+
+class Gamer:
+    """AI player. Selects strategy based on rules.
     """
-    Win = 2,
-}
 
-"""
- * AI player. Selects strategy based on rules.
-"""
-class Gamer {
-
-    def __init__(
+    def __init__(self, game: Game):
+        self._game: Game = game
+        """Personal reference to the game so we don't have to constantly pass it around.
         """
-         * Personal reference to the game so we don't have to constantly pass it around.
+    
+
+    def _get_move_options(self) -> list[GameAction]:
+        """Returns a list of the possible moves in the gamestate.
+        If the result is an empty array, no moves are possible and the game should end.
         """
-        private game: Game,
-    ) { }
+        options: list[GameAction] = []
 
-    """
-     * Returns a list of the possible moves in the gamestate.
-     * If the result is an empty array, no moves are possible and the game should end.
-    """
-    private getMoveOptions(): GameAction[] {
-        const options: GameAction[] = [];
+        if (Hand.is_random_access):
+            self._game.hand.cards_in_hand
+        else:
+            self._game.hand.top_card
 
-        if (Hand.isRandomAccess) {
-            this.game.hand.cardsInHand;
-        } else {
-            this.game.hand.topCard;
-        }
+        for src in self._game.field:
+            moveable_cards = src.moveable_cards
+            moveable = len(moveable_cards)
+            for dest in self._game.field:
+                if src == dest:
+                    continue
 
-        for (const src of this.game.field) {
-            const moveableCards = src.moveableCards;
-            const moveable = len(moveableCards);
-            for (const dest of this.game.field) {
-                if (src === dest) {
-                    continue;
-                }
-                const destTop = dest.topCard;
-                if (!destTop) {
-                    continue;
-                }
-                for (let num = 0; num < moveable; ++num) {
-                    if (stackable(destTop, moveableCards[num])) {
+                dest_top = dest.top_card
+                if not dest_top:
+                    continue
+
+                for num in range(moveable):
+                    if stackable(dest_top, moveable_cards[num]):
                         options.append({
-                            score: 1,
-                            exec: () => dest.pushToTop(src.pullFromTop(num + 1)),
-                            debug: `Move `,
-                        });
-                        break;
-                    }
-                }
-            }
-        }
+                            'score': 1,
+                            'exec': lambda: dest.push_to_top(src.pull_from_top(num + 1)),
+                            'debug': f'Move ',
+                        })
+                        break
 
         # Debug
-        if (this.game.hand.numCards !== 0) {
+        if self._game.hand.num_cards != 0:
             options.append({
-                score: 999,
-                exec: () => {
+                'score': 999,
+                'exec': lambda:
                     # Transfers top card from hand into first column of the field
-                    this.game.field[0].pushToTop(this.game.hand.pull());
-                }
-            });
-        }
-        return options;
-    }
+                    self._game.field[0].push_to_top(self._game.hand.pull())
+            })
+        return options
 
-    """
-     * Selects and performs a move in the game.
-     * @returns Success. If false, no moves are possible and game should end.
-    """
-    public tryMakeMove(): GameStatus {
+    def try_make_move(self) -> GameStatus:
+        """Selects and performs a move in the game.
+        @returns Success. If false, no moves are possible and game should end.
+        """
 
-        const options: GameAction[] = this.getMoveOptions();
+        options: list[GameAction] = self._get_move_options()
 
-        if (len(options) === 0) {
+        if len(options) == 0:
             # Todo: Add "win" condition
             # Todo: Make sure infinite loops are caught and treated as losses.
-            return GameStatus.Loss;
-        }
-        const highestScoredOption = options.reduce((p, c) => (c.score > p.score) ? c : p, options[0]);
+            return GameStatus.LOSS
+        
+        highest_scored_option = options[0]
+        for opt in options:
+            if opt.score > highest_scored_option.score:
+                highest_scored_option = opt
 
-        console.group("move options")
-        for (const opt of options) {
-            print(cleanLambda(opt.exec.toString()));
-        }
-        console.groupEnd();
-        print(`Selected move: ${cleanLambda(highestScoredOption.exec.toString())}`);
+        # print("move options")
+        # for opt in options:
+        #     print(cleanLambda(opt.exec)) # Not sure how to do this
+        
+        # print(f'Selected move: {cleanLambda(highest_scored_option.exec.toString())}') # Nor this
 
-        highestScoredOption.exec();
+        highest_scored_option.exec()
 
-        return GameStatus.Playing;
-    }
-}
+        return GameStatus.PLAYING
+
 
 def play(data: list[Card]) -> list[Card] | Literal[False]:
+    """Plays a game of solitaire.
+    @param data The input cards.
+    @returns The sorted list. Returns `False` if lost.
     """
-    * Plays a game of solitaire.
-    * @param data The input cards.
-    * @returns The sorted list. Returns `False` if lost.
-    """
-    const game: Game = new Game(data)
+    game: Game = Game(data)
     game.setup()
-    const gamer: Gamer = new Gamer(game)
+    gamer: Gamer = Gamer(game)
 
     while True:
 
         # Display the game state before each move
         game.visualize()
 
-        game_status = gamer.tryMakeMove()
+        game_status = gamer.try_make_move()
 
-        if game_status == GameStatus.Loss:
+        if game_status == GameStatus.LOSS:
             print("Lost")
             return False
-        elif game_status == GameStatus.Playing:
-            break;
-        elif game_status == GameStatus.Win:
-            return game.foundation.flatMap(stack => stack.allCards)
-        else
+        elif game_status == GameStatus.PLAYING:
+            break
+        elif game_status == GameStatus.WIN:
+            stacks: list[list[Card]] = map(lambda stack: stack.all_cards, game.foundation)
+            return [element for sublist in stacks for element in sublist] # This is so weird looking
+        else:
             raise "What?"
 
 
@@ -741,12 +736,11 @@ def solitaireSort(data: list[Card], rules) -> list[Card]:
     * @param data The list of cards to be sorted.
     * @todo Pass in rules as object instead of using constants
     """
-    # const maxTries: int = 3;
-    # for (let i = 0; i < maxTries; ++i) {
-    sorted: list[Card] | Literal[False] = play(data.slice());
-    # if (sorted !== Literal[False]) {
-    return sorted || data;
-    # }
-    # }
+    # max_tries: int = 3
+    # for i in range(max_tries):
+    sorted: list[Card] | Literal[False] = play(data.copy())
+    # if sorted != False:
+    return sorted or data
+    # 
+    # 
     # throw new Error(`Lost ${maxTries} times. Not retrying.`);
-}
