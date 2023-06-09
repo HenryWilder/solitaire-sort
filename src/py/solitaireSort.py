@@ -544,44 +544,44 @@ class Game:
         group("snapshot")
 
         if self.deck.num_cards > 0:
-            print('  '*indent+`deck: ${this.deck.numCards} cards`);
+            print('  '*indent+f'deck: {self.deck.numCards} cards')
         else:
-            print('  '*indent+`deck: empty`);
+            print('  '*indent+'deck: empty')
 
 
         if self.hand.num_cards > 0:
-            print('  '*indent+f'hand: {self.hand.num_cards} (out of {Hand.max_cards} max) cards: [[{self.hand.cards_in_hand.join('][')}]]')
+            print('  '*indent+f'hand: {self.hand.num_cards} (out of {Hand.max_cards} max) cards: [[{self.hand.cards_in_hand.join("][")}]]')
         else:
             print('  '*indent+f'hand: empty ({Hand.max_cards} max)')
 
 
         group("field");
-        for (let i = 0; i < len(self.field); ++i) {
-            if (self.field[i].numCards > 0) {
-                print('  '*indent+f'{i}: {self.field[i].num_cards} cards: [{'[?]'.repeat(self.field[i].faceDown)}[{self.field[i].faceUpCards.join('][')}]]');
-            } else {
-                print('  '*indent+f'{i}: empty');
-            }
-        }
+        for i in range(len(self.field)):
+            if self.field[i].num_cards > 0:
+                print('  '*indent+f'{i}: {self.field[i].num_cards} cards: [{"[?]".repeat(self.field[i].faceDown)}[{self.field[i].faceUpCards.join("][")}]]')
+            else:
+                print('  '*indent+f'{i}: empty')
+
+
         groupEnd();
 
         group("foundation");
         for i in range(len(self.foundation)):
             if self.foundation[i].num_cards > 0:
-                print('  '*indent+f'{i}: {self.foundation[i].numCards} cards: top: [{self.foundation[i].topCard}]');
+                print('  '*indent+f'{i}: {self.foundation[i].numCards} cards: top: [{self.foundation[i].topCard}]')
             else:
-                print('  '*indent+f'{i}: empty');
+                print('  '*indent+f'{i}: empty')
 
         groupEnd();
 
         groupEnd();
 
 
+class GameAction:
 """
  * A performable move in the game.
  * Call {@linkcode GameAction.exec|exec} to perform the move.
 """
-interface GameAction {
 
     """
      * Value of playing this move.
