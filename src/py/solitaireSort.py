@@ -10,12 +10,9 @@ remark: This project is explicitly a joke and not meant for production.
 """
 
 
-import re
 from typing import Literal, Callable, TypeAlias
 from warnings import warn
-import traceback
-import math
-import random
+import re, traceback, math, random
 import solitaireSortRules as rules
 
 
@@ -53,8 +50,7 @@ def compare_card(a: Card, b: Card) -> int:
     Returns:
         number: Difference between a and b.
     """
-    def numify(x: Card):
-        "A234567890JQK".find(x)
+    def numify(x: Card) -> int: return "A234567890JQK".find(x)
     return numify(b) - numify(a)
 
 
