@@ -69,7 +69,7 @@ const countMoveable = (cards) => {
  * @returns {number}
  */
 const countImmoveable = (cards) => {
-    return (cards.length - 1) - countMoveable(cards);
+    return cards.length - countMoveable(cards);
 }
 
 /**
@@ -192,7 +192,7 @@ const visualize = (game) => {
     const immoveableByCol = game.field.map(countImmoveable);
     console.log('.---'.repeat(game.field.length) + '.');
     for (let i = 0; i < maxColumnLength; ++i) {
-        const row = game.field.map((col, colNum) => (col.length > i) ? (i <= immoveableByCol[colNum] ? ' ' : ':') + col[i] : '  ').join(' |');
+        const row = game.field.map((col, colNum) => (col.length > i) ? (i < immoveableByCol[colNum] ? ' ' : ':') + col[i] : '  ').join(' |');
         console.log('|' + row + ' |');
     }
     console.log('\'---'.repeat(game.field.length) + '\'');
