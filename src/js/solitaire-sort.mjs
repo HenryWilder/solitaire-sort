@@ -95,6 +95,7 @@ const visualize = (game) => {
     /**
      * Returns a formatted string of the list of cards.
      * @param {Card[]} cards
+     * @param {number | undefined} slots Number of slots to make space for, even if not all are filled.
      * @returns {string}
      * ---
      * @example
@@ -103,12 +104,13 @@ const visualize = (game) => {
      * listCards([]) => "[]"
      * ```
      */
-    const listCards = (cards) => '[' + cards.map(c => `[${c}]`).join('') + ']';
+    const listCards = (cards, slots = undefined) => '[' + cards.map(c => `[${c}]`).join('').padEnd((slots ?? 0) * 3, '[ ]') + ']';
 
     /**
      * If `cards` is not empty, logs an indented line listing `cards` (see {@linkcode listCards}).\
      * If `cards` is empty, does nothing.
      * @param {Card[]} cards The list of cards to try printing.
+     * @param {number | undefined} slots Number of slots to make space for, even if not all are filled.
      * @returns {void}
      * ---
      * #### Code
@@ -125,13 +127,13 @@ const visualize = (game) => {
      *   cards: [[A][5][2][J][8]]
      * ```
      */
-    const logIndentedCardLineIfThereAreCards = (cards) => (cards.length > 0) && console.log(`  cards: ${listCards(cards)}`);
+    const logIndentedCardLineIfThereAreCards = (cards, slots = undefined) => (cards.length > 0) && console.log(`  cards: ${listCards(cards, slots)}`);
 
     console.log(`deck: ${numCardsOrEmpty(game.deck)}`);
     logIndentedCardLineIfThereAreCards(game.deck);
 
     console.log(`hand: ${numCardsOrEmpty(game.hand)} (${rules.HAND_SIZE_MAX} max)`);
-    logIndentedCardLineIfThereAreCards(game.hand);
+    logIndentedCardLineIfThereAreCards(game.hand, rules.HAND_SIZE_MAX);
 
     console.group("field");
     for (let i = 0; i < game.field.length; ++i) {
