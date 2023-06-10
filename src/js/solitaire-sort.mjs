@@ -81,7 +81,7 @@ const visualize = (game) => {
     /**
      * If `cards` is not empty, returns `cards.length` followed by "cards".\
      * If `cards` is empty, prints "empty".
-     * @param {any[]} cards List to check.
+     * @param {Card[]} cards List to check.
      * @returns {string}
      * ---
      * @example
@@ -127,21 +127,22 @@ const visualize = (game) => {
      */
     const logIndentedCardLineIfThereAreCards = (cards) => (game.hand.length > 0) && console.log(`  cards: ${listCards(cards)}`);
 
-    console.log(`deck: ${numCardsOrEmpty(game.deck.length)}`);
+    console.log(`deck: ${numCardsOrEmpty(game.deck)}`);
+    logIndentedCardLineIfThereAreCards(game.deck);
 
-    console.log(`hand: ${numCardsOrEmpty(game.hand.length)} (${rules.HAND_SIZE_MAX} max)`);
-    logIndentedCardLineIfThereAreCards(game.hand)
+    console.log(`hand: ${numCardsOrEmpty(game.hand)} (${rules.HAND_SIZE_MAX} max)`);
+    logIndentedCardLineIfThereAreCards(game.hand);
 
     console.group("field");
     for (let i = 0; i < game.field.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.field[i].length)}`);
+        console.log(`${i}: ${numCardsOrEmpty(game.field[i])}`);
         logIndentedCardLineIfThereAreCards(game.field[i]);
     }
     console.groupEnd();
 
     console.group("foundation");
     for (let i = 0; i < game.foundation.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.foundation[i].length)}`);
+        console.log(`${i}: ${numCardsOrEmpty(game.foundation[i])}`);
         logIndentedCardLineIfThereAreCards(game.foundation[i]);
     }
     console.groupEnd();
@@ -166,7 +167,7 @@ const play = (data) => {
 
     const game = {
         /** @type {Deck} @readonly */
-        deck: data,
+        deck: [],
 
         /** @type {Hand} @readonly */
         hand: [],
@@ -180,18 +181,21 @@ const play = (data) => {
 
     // Setup
     {
+        // Populate deck
+        game.deck.push(...data);
+    
         // Shuffle deck
-        {
-            for (let i = game.deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [game.deck[i], game.deck[j]] = [game.deck[j], game.deck[i]]; // Swaps elements i and j
-            }
+        for (let i = game.deck.length - 1; i > 0; --i) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [game.deck[i], game.deck[j]] = [game.deck[j], game.deck[i]]; // Swaps elements i and j
         }
 
         for (let i = 0; i < game.foundation.length; ++i) {
             field[i] = game.deck.splice(-(i + 1));
         }
-        game.hand.unshift(...data.splice(-rules.HAND_SIZE_MAX));
+        
+        const handCards = data.splice(-rules.HAND_SIZE_MAX);
+        game.hand.push(...handCards);
     }
 
     while (true) {
@@ -219,7 +223,8 @@ const play = (data) => {
  * @returns {Card[]} The sorted list
  */
 export const solitaireSort = (data) => {
-    const maxTries = 3;
+    console.log(data);
+    const maxTries = 1;
     for (let i = 0; i < maxTries; ++i) {
         /** @type {Card[] | null} */ const sorted = play(data.slice());
         if (sorted !== null) {
