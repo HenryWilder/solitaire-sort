@@ -126,63 +126,12 @@ const GameStatus = {
 const visualize = (game) => {
     console.group("snapshot");
 
-    /**
-     * If `cards` is not empty, returns `cards.length` followed by "cards".\
-     * If `cards` is empty, prints "empty".
-     * @param {Card[]} cards List to check.
-     * @returns {string}
-     * ---
-     * @example
-     * ```
-     * numCardsOrEmpty(5) => "5 cards"
-     * numCardsOrEmpty(0) => "empty"
-     * ```
-     */
-    const numCardsOrEmpty = (cards) => cards.length && `${cards.length} cards` || "empty";
-
-    /**
-     * Returns a formatted string of the list of cards.
-     * @param {Card[]} cards
-     * @param {number | undefined} slots Number of slots to make space for, even if not all are filled.
-     * @returns {string}
-     * ---
-     * @example
-     * ```
-     * listCards(['A','5','2','J','8']) => "[[A][5][2][J][8]]"
-     * listCards([]) => "[]"
-     * ```
-     */
-    const listCards = (cards, slots = undefined) => '[ ' + cards.join(' ').padEnd((slots ?? 0), ' ') + ' ]';
-
-    /**
-     * If `cards` is not empty, logs an indented line listing `cards` (see {@linkcode listCards}).\
-     * If `cards` is empty, does nothing.
-     * @param {Card[]} cards The list of cards to try printing.
-     * @param {number | undefined} slots Number of slots to make space for, even if not all are filled.
-     * @returns {void}
-     * ---
-     * #### Code
-     * ```js
-     * console.log("hand: empty")
-     * logIndentedCardLineIfThereAreCards([])
-     * console.log("deck: 5 cards")
-     * logIndentedCardLineIfThereAreCards(['A','5','2','J','8'])
-     * ```
-     * #### Output
-     * ```plaintext
-     * hand: empty
-     * deck: 5 cards
-     *   [[A][5][2][J][8]]
-     * ```
-     */
-    const logIndentedCardLineIfThereAreCards = (cards, slots = undefined) => (cards.length > 0) && console.log(`  ${listCards(cards, slots)}`);
-
     console.group("deck");
-    console.log(listCards(game.deck));
+    console.log('[ ' + game.deck.join(' ') + ' ]');
     console.groupEnd();
 
     console.group("hand");
-    console.log(listCards(game.hand, rules.HAND_SIZE_MAX));
+    console.log('[' + game.hand.map((c, i, arr) => (i === arr.length - 1) ? `[${c}]` : ` ${c} `).join('').padEnd(rules.HAND_SIZE_MAX * 3, '   ') + ']');
     console.groupEnd();
 
     console.group("field");
@@ -200,7 +149,7 @@ const visualize = (game) => {
 
     console.group("foundation");
     for (let i = 0; i < game.foundation.length; ++i) {
-        console.log(listCards(game.foundation[i]));
+        console.log('[ ' + game.foundation[i].join(' ') + ' ]');
     }
     console.groupEnd();
 
