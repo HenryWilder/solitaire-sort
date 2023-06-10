@@ -155,7 +155,7 @@ const visualize = (game) => {
  * @returns {GameStatus}
  */
 const tryMakeMove = (game) => {
-
+    return GameStatus.Loss;
 }
 
 /**
@@ -191,7 +191,7 @@ const play = (data) => {
         for (let i = 0; i < game.foundation.length; ++i) {
             field[i] = game.deck.splice(-(i + 1));
         }
-        game.hand.unshift(data.splice(-rules.HAND_SIZE_MAX));
+        game.hand.unshift(...data.splice(-rules.HAND_SIZE_MAX));
     }
 
     while (true) {
