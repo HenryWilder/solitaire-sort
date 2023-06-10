@@ -613,7 +613,8 @@ class Gamer {
                 exec: () => {
                     // Transfers top card from hand into first column of the field
                     this.game.field[0].pushToTop(this.game.hand.pull());
-                }
+                },
+                debug: ``,
             });
         }
         return options;
@@ -683,12 +684,12 @@ const play = (data: Card[]): Card[] | null => {
  * @todo Pass in rules as object instead of using constants
  */
 export const solitaireSort = (data: Card[]): Card[] => {
-    // const maxTries: number = 3;
-    // for (let i = 0; i < maxTries; ++i) {
-    const sorted: Card[] | null = play(data.slice());
-    // if (sorted !== null) {
-    return sorted || data;
-    // }
-    // }
-    // throw new Error(`Lost ${maxTries} times. Not retrying.`);
+    const maxTries: number = 3;
+    for (let i = 0; i < maxTries; ++i) {
+        const sorted: Card[] | null = play(data.slice());
+        if (sorted !== null) {
+            return sorted || data;
+        }
+    }
+    throw new Error(`Lost ${maxTries} times. Not retrying.`);
 }

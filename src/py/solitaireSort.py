@@ -704,11 +704,10 @@ def solitaire_sort(data: list[Card], rules) -> list[Card]:
     Todo:
         Pass in rules as object instead of using constants
     """
-    # max_tries: int = 3
-    # for i in range(max_tries):
-    sorted: list[Card] | Literal[False] = play(data.copy())
-    # if sorted != False:
-    return sorted or data
-    # 
-    # 
-    # throw new Error(`Lost ${max_tries} times. Not retrying.`);
+    max_tries: int = 3
+    for _ in range(max_tries):
+        sorted: list[Card] | Literal[False] = play(data.copy())
+        if sorted != False:
+            return sorted or data
+    
+    raise f'Lost {max_tries} times. Not retrying.'
