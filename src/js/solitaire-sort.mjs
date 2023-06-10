@@ -104,7 +104,7 @@ const visualize = (game) => {
      * listCards([]) => "[]"
      * ```
      */
-    const listCards = (cards, slots = undefined) => '[' + cards.map(c => `[${c}]`).join('').padEnd((slots ?? 0) * 3, '[ ]') + ']';
+    const listCards = (cards, slots = undefined) => '[ ' + cards.join(' ').padEnd((slots ?? 0), ' ') + ' ]';
 
     /**
      * If `cards` is not empty, logs an indented line listing `cards` (see {@linkcode listCards}).\
@@ -138,9 +138,14 @@ const visualize = (game) => {
     console.groupEnd();
 
     console.group("field");
-    for (let i = 0; i < game.field.length; ++i) {
-        console.log(listCards(game.field[i]));
+    /** @type {number} */
+    const maxColumnLength = game.field.reduce((c, p) => (c.length > p.length) ? c : p, []).length;
+    console.log('.---'.repeat(game.field.length) + '.');
+    for (let i = 0; i < maxColumnLength; ++i) {
+        const row = game.field.map((col) => (col.length > i) ? col[i] : ' ').join(' | ');
+        console.log('| ' + row + ' |');
     }
+    console.log('\'---'.repeat(game.field.length) + '\'');
     console.groupEnd();
 
     console.group("foundation");
