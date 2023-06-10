@@ -190,7 +190,7 @@ const play = (data) => {
             [game.deck[i], game.deck[j]] = [game.deck[j], game.deck[i]]; // Swaps elements i and j
         }
 
-        for (let i = 0; i < game.foundation.length; ++i) {
+        for (let i = 0; i < game.field.length; ++i) {
             game.field[i] = game.deck.splice(-(i + 1));
         }
         
