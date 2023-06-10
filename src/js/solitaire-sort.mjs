@@ -124,28 +124,24 @@ const visualize = (game) => {
      * ```plaintext
      * hand: empty
      * deck: 5 cards
-     *   cards: [[A][5][2][J][8]]
+     *   [[A][5][2][J][8]]
      * ```
      */
-    const logIndentedCardLineIfThereAreCards = (cards, slots = undefined) => (cards.length > 0) && console.log(`  cards: ${listCards(cards, slots)}`);
+    const logIndentedCardLineIfThereAreCards = (cards, slots = undefined) => (cards.length > 0) && console.log(`  ${listCards(cards, slots)}`);
 
-    console.log(`deck: ${numCardsOrEmpty(game.deck)}`);
-    logIndentedCardLineIfThereAreCards(game.deck);
+    console.log(`deck: ${numCardsOrEmpty(game.deck)} ${listCards(game.deck)}`);
 
-    console.log(`hand: ${numCardsOrEmpty(game.hand)} (${rules.HAND_SIZE_MAX} max)`);
-    logIndentedCardLineIfThereAreCards(game.hand, rules.HAND_SIZE_MAX);
+    console.log(`hand: ${numCardsOrEmpty(game.hand)} (${rules.HAND_SIZE_MAX} max) ${listCards(game.hand, rules.HAND_SIZE_MAX)}`);
 
     console.group("field");
     for (let i = 0; i < game.field.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.field[i])}`);
-        logIndentedCardLineIfThereAreCards(game.field[i]);
+        console.log(`${i}: ${numCardsOrEmpty(game.field[i])} ${listCards(game.field[i])}`);
     }
     console.groupEnd();
 
     console.group("foundation");
     for (let i = 0; i < game.foundation.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.foundation[i])}`);
-        logIndentedCardLineIfThereAreCards(game.foundation[i]);
+        console.log(`${i}: ${numCardsOrEmpty(game.foundation[i])} ${listCards(game.foundation[i])}`);
     }
     console.groupEnd();
 
