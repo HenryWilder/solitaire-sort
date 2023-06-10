@@ -176,7 +176,7 @@ const play = (data) => {
         field: [[], [], [], [], [], [], [], []],
 
         /** @type {Foundation} @readonly */
-        foundation: [],
+        foundation: [[]],
     };
 
     // Setup
@@ -191,7 +191,7 @@ const play = (data) => {
         }
 
         for (let i = 0; i < game.foundation.length; ++i) {
-            field[i] = game.deck.splice(-(i + 1));
+            game.field[i] = game.deck.splice(-(i + 1));
         }
         
         const handCards = data.splice(-rules.HAND_SIZE_MAX);
