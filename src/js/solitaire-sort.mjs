@@ -129,19 +129,23 @@ const visualize = (game) => {
      */
     const logIndentedCardLineIfThereAreCards = (cards, slots = undefined) => (cards.length > 0) && console.log(`  ${listCards(cards, slots)}`);
 
-    console.log(`deck: ${numCardsOrEmpty(game.deck)} ${listCards(game.deck)}`);
+    console.group("deck");
+    console.log(listCards(game.deck));
+    console.groupEnd();
 
-    console.log(`hand: ${numCardsOrEmpty(game.hand)} (${rules.HAND_SIZE_MAX} max) ${listCards(game.hand, rules.HAND_SIZE_MAX)}`);
+    console.group("hand");
+    console.log(listCards(game.hand, rules.HAND_SIZE_MAX));
+    console.groupEnd();
 
     console.group("field");
     for (let i = 0; i < game.field.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.field[i])} ${listCards(game.field[i])}`);
+        console.log(listCards(game.field[i]));
     }
     console.groupEnd();
 
     console.group("foundation");
     for (let i = 0; i < game.foundation.length; ++i) {
-        console.log(`${i}: ${numCardsOrEmpty(game.foundation[i])} ${listCards(game.foundation[i])}`);
+        console.log(listCards(game.foundation[i]));
     }
     console.groupEnd();
 
