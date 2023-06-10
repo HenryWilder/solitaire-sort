@@ -24,6 +24,54 @@
  * @typedef {{ deck: Deck; hand: Hand; field: Field; foundation: Foundation }} Game
  */
 
+
+/**
+ * Compares two instances of `Card` to see what order they should be in.
+ * @param {Card} a
+ * @param {Card} b
+ * @returns {number}
+ */
+const compareCard = (a, b) => {
+    /** @param {Card} x @returns {number} */
+    const numify = (x) => "A234567890JQK".indexOf(x);
+    return numify(b) - numify(a);
+};
+
+/**
+ * Whether the given cards can be stacked.
+ * @param {Card} a The card below.
+ * @param {Card} b The card above.
+ * @returns {boolean}
+ */
+const stackable = (a, b) => {
+    return compareCard(a, b) === 1;
+}
+
+/**
+ * Returns the number of moveable cards in the stack.
+ * Will only ever be below 1 if the array is empty.
+ * @param {Card[]} cards
+ * @returns {number}
+ */
+const countMoveable = (cards) => {
+    for (let i = cards.length - 1; i >= 1; --i) {
+        if (!stackable(cards[i], cards[i - 1])) {
+            return cards.length - i;
+        }
+    }
+    return cards.length;
+}
+
+/**
+ * Returns the number of moveable cards in the stack.
+ * Will only ever be below 1 if the array is empty.
+ * @param {Card[]} cards
+ * @returns {number}
+ */
+const countImmoveable = (cards) => {
+    return (cards.length - 1) - countMoveable(cards);
+}
+
 /**
  * Namespace for Solitaire Sort rules.
  * @namespace
@@ -140,10 +188,12 @@ const visualize = (game) => {
     console.group("field");
     /** @type {number} */
     const maxColumnLength = game.field.reduce((c, p) => (c.length > p.length) ? c : p, []).length;
+    /** @type {number[]} */
+    const immoveableByCol = game.field.map(countImmoveable);
     console.log('.---'.repeat(game.field.length) + '.');
     for (let i = 0; i < maxColumnLength; ++i) {
-        const row = game.field.map((col) => (col.length > i) ? col[i] : ' ').join(' | ');
-        console.log('| ' + row + ' |');
+        const row = game.field.map((col, colNum) => (col.length > i) ? (i <= immoveableByCol[colNum] ? ' ' : ':') + col[i] : '  ').join(' |');
+        console.log('|' + row + ' |');
     }
     console.log('\'---'.repeat(game.field.length) + '\'');
     console.groupEnd();
