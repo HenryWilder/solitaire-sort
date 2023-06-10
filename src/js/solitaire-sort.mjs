@@ -125,7 +125,7 @@ const visualize = (game) => {
      *   cards: [[A][5][2][J][8]]
      * ```
      */
-    const logIndentedCardLineIfThereAreCards = (cards) => (game.hand.length > 0) && console.log(`  cards: ${listCards(cards)}`);
+    const logIndentedCardLineIfThereAreCards = (cards) => (cards.length > 0) && console.log(`  cards: ${listCards(cards)}`);
 
     console.log(`deck: ${numCardsOrEmpty(game.deck)}`);
     logIndentedCardLineIfThereAreCards(game.deck);
